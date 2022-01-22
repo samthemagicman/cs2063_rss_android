@@ -2,6 +2,7 @@ package ca.unb.mobiledev.rss;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +15,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -49,9 +51,10 @@ public class MainActivity extends AppCompatActivity
                     {
                         try
                         {
-                           // List<KijijiParser.DataModel> items =  KijijiParser.parseRssFeed(response);
-                            int m = 1;
-
+                            List<KijijiParser.DataModel> items =  KijijiParser.parseRssFeed(response);
+                            Intent intent = new Intent(MainActivity.this, ListActivity.class);
+                            intent.putExtra("rssItems", (Serializable) items);
+                            startActivity(intent);
                         }
                         catch (Exception e)
                         {
