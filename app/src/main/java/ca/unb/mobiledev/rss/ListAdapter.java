@@ -1,7 +1,11 @@
 package ca.unb.mobiledev.rss;
 
+import android.content.AsyncQueryHandler;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,14 +16,24 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.InputStream;
+import java.lang.reflect.Array;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+
+import javax.net.ssl.HttpsURLConnection;
+
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>
 {
     private List<KijijiParser.DataModel> m_items;
     private Context m_context;
     private int selectedIndex = -1;
-
 
     public ListAdapter(List<KijijiParser.DataModel> items, Context context)
     {
@@ -43,12 +57,30 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>
 
         int currentPos = position;
 
-        KijijiParser.DataModel selectedItem = m_items.get(position);
+        if(m_items.isEmpty()) return;
 
+        KijijiParser.DataModel item = m_items.get(position);
 
-        holder.titleView.setText(selectedItem.entryModel.get(RssParserUtilities.GlobalTags.title).toString());
-        //FIXME: - Add the rest of the items here.
+        boolean isValidForDisplay = item.entryModel.containsKey(RssParserUtilities.GlobalTags.title) &&
+                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.description) &&
+                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.enclosure) &&
+                                   // item.imageBitmap != null &&
+                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.link);
+
+        if(!isValidForDisplay)
+            holder.titleView.setText("Invalid ");
+        else {
+            String title = (String) item.entryModel.get(RssParserUtilities.GlobalTags.title);
+            String description = (String) item.entryModel.get(RssParserUtilities.GlobalTags.description);
+
+            holder.titleView.setText(title);
+            holder.descriptionView.setText(description);
+            holder.imageView.setImageBitmap(item.imageBitmap);
+        }
     }
+
+
+
 
     @Override
     public int getItemCount() {
