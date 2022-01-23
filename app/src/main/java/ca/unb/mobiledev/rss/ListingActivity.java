@@ -26,7 +26,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         // Get the background because they have not been processed yet
         for(KijijiParser.DataModel item: m_list)
         {
-            KijijiParser.RetrieveImageTask task = new KijijiParser.RetrieveImageTask(item, this);
+            ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
             task.execute((String)item.entryModel.get(RssParserUtilities.GlobalTags.enclosure));
         }
 
@@ -46,6 +46,8 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     @Override
     public void onTaskCompleted() {
         RecyclerView view = findViewById(R.id.recyclerView);
-        view.getAdapter().notifyDataSetChanged();
+        //TODO: - Return model from this async task. Find the matching object in the list
+        // then update the individual componenet, not the whole list.
+        listAdapter.notifyDataSetChanged();
     }
 }
