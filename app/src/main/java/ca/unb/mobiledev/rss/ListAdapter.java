@@ -1,11 +1,16 @@
 package ca.unb.mobiledev.rss;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +19,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.io.InputStream;
 import java.lang.reflect.Array;
@@ -22,21 +33,24 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.net.ssl.HttpsURLConnection;
 
 
-public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>
-{
+public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private List<KijijiParser.DataModel> m_items;
     private Context m_context;
     private int selectedIndex = -1;
 
-    public ListAdapter(List<KijijiParser.DataModel> items, Context context)
-    {
+
+    public ListAdapter(List<KijijiParser.DataModel> items, Context context) {
         this.m_items = items;
         this.m_context = context;
     }
@@ -50,33 +64,50 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position)
-    {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Color Selected Item
-        holder.itemView.setBackgroundColor(selectedIndex == position ?  Color.RED : Color.TRANSPARENT);
+        holder.itemView.setBackgroundColor(selectedIndex == position ? Color.RED : Color.TRANSPARENT);
 
         int currentPos = position;
 
-        if(m_items.isEmpty()) return;
+        if (m_items.isEmpty()) return;
 
         KijijiParser.DataModel item = m_items.get(position);
 
-        boolean isValidForDisplay = item.entryModel.containsKey(RssParserUtilities.GlobalTags.title) &&
-                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.description) &&
-                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.enclosure) &&
-                                   // item.imageBitmap != null &&
-                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.link);
+//        boolean isValidForDisplay = item.entryModel.containsKey(RssParserUtilities.GlobalTags.title) &&
+//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.description) &&
+//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.enclosure) &&
+//                                    item.imageBitmap != null &&
+//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.price) &&
+//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.lat) &&
+//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.lon) &&
+//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.link);
 
-        if(!isValidForDisplay)
-            holder.titleView.setText("Invalid ");
-        else {
-            String title = (String) item.entryModel.get(RssParserUtilities.GlobalTags.title);
-            String description = (String) item.entryModel.get(RssParserUtilities.GlobalTags.description);
+        // Info
+        String title = (String) item.entryModel.get(RssParserUtilities.GlobalTags.title);
+        String description = (String) item.entryModel.get(RssParserUtilities.GlobalTags.description);
 
+        // Cost
+        String cost = (String) item.entryModel.get(RssParserUtilities.GlobalTags.price);
+        String costStr = "Cost: $" + cost.split("\\.")[0]; // Lets get rid of cents.
+
+        // Date
+        String date = (String) item.entryModel.get(RssParserUtilities.GlobalTags.dcDate);
+        String dateToPrint = "N/A";
+        try {
+            Date dateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(date);
+            SimpleDateFormat a = new SimpleDateFormat("dd/MM/yy");
+            dateToPrint = a.format(dateTime);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // Set our items to display the content
             holder.titleView.setText(title);
             holder.descriptionView.setText(description);
             holder.imageView.setImageBitmap(item.imageBitmap);
-        }
+            holder.costView.setText(costStr);
+            holder.distanceView.setText(dateToPrint);
     }
 
 
@@ -94,7 +125,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>
         ImageView imageView;
         TextView titleView;
         TextView descriptionView;
-        RelativeLayout parentLayout;
+        TextView costView;
+        TextView distanceView;
+        ConstraintLayout parentLayout;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -103,6 +136,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder>
             imageView = itemView.findViewById(R.id.image);
             titleView = itemView.findViewById(R.id.text_title);
             descriptionView = itemView.findViewById(R.id.text_desc);
+            costView = itemView.findViewById(R.id.cost_desc);
+            distanceView = itemView.findViewById(R.id.dist_desc);
             parentLayout = itemView.findViewById(R.id.parent_layout);
         }
     }

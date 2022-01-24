@@ -1,5 +1,7 @@
 package ca.unb.mobiledev.rss;
 
+import android.util.Log;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -84,7 +86,8 @@ public final class RssParserUtilities
                     case lat:
                     case lon:
                     case price:
-                        parseGenericAsDouble(parser, itemTag.toString(), item);
+                        parseGenericAsString(parser, itemTag.toString(), item);
+                        //parseGenericAsDouble(parser, itemTag.toString(), item);
                         break;
 
                     default:
@@ -142,7 +145,6 @@ public final class RssParserUtilities
         if(parser.next() == XmlPullParser.TEXT)
         {
             text = parser.getText();
-            //String text2 = parser.getText();
             parser.nextTag();
         }
         return text;

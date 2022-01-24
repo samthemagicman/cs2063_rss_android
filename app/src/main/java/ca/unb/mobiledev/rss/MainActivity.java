@@ -36,6 +36,8 @@ public class MainActivity extends AppCompatActivity
             public void onClick(View view) {
                 String url ="https://www.kijiji.ca/rss-srp-fredericton/test/k0l1700018";
                 getRequest(url);
+
+
             }
         });
     }
