@@ -77,7 +77,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     // When the images have been loaded from the webpage,
     // we need to update our recycler view - this is how we do it.
     @Override
-    public void onTaskCompleted()
+    public void onImageDownloadCompleted()
     {
         //TODO: - Return model from this async task. Find the matching object in the list
         // then update the individual componenet, not the whole list.
