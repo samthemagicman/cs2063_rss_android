@@ -35,21 +35,13 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
         m_list = (List<KijijiParser.DataModel>) getIntent().getSerializableExtra("rssItems");
 
+        RequestImagesInBackground();
         initRecyclerView();
-
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-
-        // Get the images in the background because they have not been downloaded and processed yet.
-        for (KijijiParser.DataModel item : m_list) {
-            ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
-            task.execute((String) item.entryModel.get(RssParserUtilities.GlobalTags.enclosure));
-        }
-
 
         // Get the current location of the device
         locationManager = (LocationManager) getSystemService(this.LOCATION_SERVICE);
@@ -70,6 +62,15 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         listAdapter = new ListAdapter(m_list, this);
         view.setAdapter(listAdapter);
         view.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void RequestImagesInBackground()
+    {
+        // Get the images in the background because they have not been downloaded and processed yet.
+        for (KijijiParser.DataModel item : m_list) {
+            ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
+            task.execute((String) item.entryModel.get(RssParserUtilities.GlobalTags.enclosure));
+        }
     }
 
 
@@ -102,6 +103,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     public void onStatusChanged(String provider, int status, Bundle extras)
     {
         //TODO: - if we dont override this we get terminal exception.
-        // maybe we should be doing something with this? 
+        // maybe we should be doing something with this?
     }
 }
