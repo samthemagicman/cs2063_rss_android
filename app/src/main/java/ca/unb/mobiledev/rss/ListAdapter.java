@@ -4,11 +4,13 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.AsyncQueryHandler;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -67,7 +69,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Color Selected Item
-        holder.itemView.setBackgroundColor(selectedIndex == position ? Color.RED : Color.TRANSPARENT);
+        holder.itemView.setBackgroundColor(selectedIndex == position ? Color.rgb(62,170,250) : Color.TRANSPARENT);
 
         int currentPos = position;
 
@@ -77,15 +79,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         //TODO: - Validation for each item - Maybe these should be in their own
         // methods.
-
-//        boolean isValidForDisplay = item.entryModel.containsKey(RssParserUtilities.GlobalTags.title) &&
-//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.description) &&
-//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.enclosure) &&
-//                                    item.imageBitmap != null &&
-//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.price) &&
-//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.lat) &&
-//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.lon) &&
-//                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.link);
 
         // Info
         String title = (String) item.entryModel.get(RssParserUtilities.GlobalTags.title);
@@ -135,6 +128,44 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.costView.setText(costStr);
             holder.distanceView.setText(distance);
             holder.dateView.setText(dateToPrint);
+
+
+        //Click Listener
+        holder.parentLayout.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                // Show item in external browser
+                if(selectedIndex == currentPos) // User double clicked
+                {
+                    ShowExternalBrowser(item.entryModel.get(RssParserUtilities.GlobalTags.link).toString());
+                }
+
+                notifyItemChanged(selectedIndex);
+                selectedIndex = currentPos;
+                notifyItemChanged(selectedIndex);
+
+                //TODO: - Switch text to white when selected.
+            }
+        });
+    }
+
+    public void ShowExternalBrowser(String externalUrl)
+    {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(externalUrl));
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setPackage("com.android.chrome");
+
+        try{
+            m_context.startActivity(intent);
+        }
+        catch(Exception e)
+        {
+            //Chrome not installed allow user to choose
+            intent.setPackage(null);
+            m_context.startActivity(intent);
+        }
     }
 
     public void updateCurrentDeviceLocation(Location location)

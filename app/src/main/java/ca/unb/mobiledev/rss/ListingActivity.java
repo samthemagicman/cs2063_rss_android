@@ -3,6 +3,7 @@ package ca.unb.mobiledev.rss;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -50,15 +51,14 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         initRecyclerView();
 
         // TODO: - This is probably not safe. Clear my own permissions and retry with no and see what happens.
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
+        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
         Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-
-
     }
 
     private void initRecyclerView()
     {
         RecyclerView view = findViewById(R.id.recyclerView);
+        view.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL));
         listAdapter = new ListAdapter(m_list, this);
         view.setAdapter(listAdapter);
         view.setLayoutManager(new LinearLayoutManager(this));
@@ -80,11 +80,14 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     public void onLocationChanged(@NonNull Location location)
     {
         try {
+            if(listAdapter == null) return;
+            if(location == null) return;
+
             listAdapter.updateCurrentDeviceLocation(location);
         }
         catch(Exception e)
         {
-
+            e.printStackTrace();
         }
     }
 }
