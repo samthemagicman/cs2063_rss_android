@@ -48,6 +48,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     private List<KijijiParser.DataModel> m_items;
     private Context m_context;
     private int selectedIndex = -1;
+    private Location m_location = null;
 
 
     public ListAdapter(List<KijijiParser.DataModel> items, Context context) {
@@ -74,6 +75,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         KijijiParser.DataModel item = m_items.get(position);
 
+        //TODO: - Validation for each item - Maybe these should be in their own
+        // methods.
+
 //        boolean isValidForDisplay = item.entryModel.containsKey(RssParserUtilities.GlobalTags.title) &&
 //                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.description) &&
 //                                    item.entryModel.containsKey(RssParserUtilities.GlobalTags.enclosure) &&
@@ -93,13 +97,35 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         // Date
         String date = (String) item.entryModel.get(RssParserUtilities.GlobalTags.dcDate);
-        String dateToPrint = "N/A";
+        String dateToPrint = "Days: N/A";
         try {
             Date dateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(date);
             SimpleDateFormat a = new SimpleDateFormat("dd/MM/yy");
-            dateToPrint = a.format(dateTime);
+
+            Date current = new Date();
+
+            int diffInDays = (int)( (current.getTime() - dateTime.getTime())
+                    / (1000 * 60 * 60 * 24) );
+
+            //dateToPrint = a.format(dateTime);
+            dateToPrint = "Days: " + diffInDays;
+
         } catch (ParseException e) {
             e.printStackTrace();
+        }
+
+        //Location
+        String distance = "Dist: N/A";
+        if(m_location != null)
+        {
+            Location deviceLocation = m_location;
+            Location itemLocation = new Location("item");
+            itemLocation.setLatitude(Double.parseDouble(item.entryModel.get(RssParserUtilities.GlobalTags.lat).toString()));
+            itemLocation.setLongitude(Double.parseDouble(item.entryModel.get(RssParserUtilities.GlobalTags.lon).toString()));
+
+            double dist = deviceLocation.distanceTo(itemLocation)/1000; //distance = km
+            String conv = String.format("%.2f", dist);
+            distance = "Dist: " + conv + "km";
         }
 
         // Set our items to display the content
@@ -107,10 +133,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.descriptionView.setText(description);
             holder.imageView.setImageBitmap(item.imageBitmap);
             holder.costView.setText(costStr);
-            holder.distanceView.setText(dateToPrint);
+            holder.distanceView.setText(distance);
+            holder.dateView.setText(dateToPrint);
     }
 
+    public void updateCurrentDeviceLocation(Location location)
+    {
+        m_location = location;
 
+        //TODO: - make this smarter and only update the requierd components and not the whole view.
+        this.notifyDataSetChanged();
+    }
 
 
     @Override
@@ -127,6 +160,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         TextView descriptionView;
         TextView costView;
         TextView distanceView;
+        TextView dateView;
         ConstraintLayout parentLayout;
 
         public ViewHolder(@NonNull View itemView) {
@@ -138,6 +172,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             descriptionView = itemView.findViewById(R.id.text_desc);
             costView = itemView.findViewById(R.id.cost_desc);
             distanceView = itemView.findViewById(R.id.dist_desc);
+            dateView = itemView.findViewById(R.id.date_desc);
             parentLayout = itemView.findViewById(R.id.parent_layout);
         }
     }

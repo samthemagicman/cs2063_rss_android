@@ -47,10 +47,12 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
         }
 
+        initRecyclerView();
+
+        // TODO: - This is probably not safe. Clear my own permissions and retry with no and see what happens.
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
         Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
 
-        initRecyclerView();
 
     }
 
@@ -66,7 +68,8 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     // When the images have been loaded from the webpage,
     // we need to update our recycler view - this is how we do it.
     @Override
-    public void onTaskCompleted() {
+    public void onTaskCompleted()
+    {
         RecyclerView view = findViewById(R.id.recyclerView);
         //TODO: - Return model from this async task. Find the matching object in the list
         // then update the individual componenet, not the whole list.
@@ -76,6 +79,12 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     @Override
     public void onLocationChanged(@NonNull Location location)
     {
-        //Log.d("Got a location", "Location");
+        try {
+            listAdapter.updateCurrentDeviceLocation(location);
+        }
+        catch(Exception e)
+        {
+
+        }
     }
 }
