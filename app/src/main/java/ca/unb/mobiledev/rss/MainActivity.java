@@ -35,14 +35,12 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 String url ="https://www.kijiji.ca/rss-srp-fredericton/test/k0l1700018";
-                getRequest(url);
-
-
+                GetItemsFromRssUrlAndLaunchListView(url);
             }
         });
     }
 
-    private void getRequest(String url)
+    private void GetItemsFromRssUrlAndLaunchListView(String url)
     {
         RequestQueue queue = Volley.newRequestQueue(this);
 
@@ -54,27 +52,27 @@ public class MainActivity extends AppCompatActivity
                     {
                         try
                         {
-
                             m_items =  KijijiParser.parseRssFeed(response);
-
 
                             Intent intent = new Intent(MainActivity.this, ListingActivity.class);
                             intent.putExtra("rssItems", (Serializable) m_items);
                             startActivity(intent);
-
-
-
                         }
                         catch (Exception e)
                         {
-                          e.printStackTrace();
+                            //TODO: - We should inform the user that we couldnt get the
+                            // data from the url
+                            e.printStackTrace();
                         }
                     }
                 },
                 new Response.ErrorListener()
                 {
                     @Override
-                    public void onErrorResponse(VolleyError error) {
+                    public void onErrorResponse(VolleyError error)
+                    {
+                        //TODO: - We should inform the user that we couldnt get the
+                        // data from the url
                         assert(false);
                         Log.d("RssNoResponse:", "ERROR");
                     }
