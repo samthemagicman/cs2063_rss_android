@@ -35,6 +35,15 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
         m_list = (List<KijijiParser.DataModel>) getIntent().getSerializableExtra("rssItems");
 
+        initRecyclerView();
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         // Get the images in the background because they have not been downloaded and processed yet.
         for (KijijiParser.DataModel item : m_list) {
             ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
@@ -48,11 +57,10 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
         }
 
-        initRecyclerView();
-
         // TODO: - This is probably not safe. Clear my own permissions and retry with no and see what happens.
-        //locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
         Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
     }
 
     private void initRecyclerView()
@@ -70,7 +78,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     @Override
     public void onTaskCompleted()
     {
-        RecyclerView view = findViewById(R.id.recyclerView);
         //TODO: - Return model from this async task. Find the matching object in the list
         // then update the individual componenet, not the whole list.
         listAdapter.notifyDataSetChanged();
@@ -89,5 +96,12 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onStatusChanged(String provider, int status, Bundle extras)
+    {
+        //TODO: - if we dont override this we get terminal exception.
+        // maybe we should be doing something with this? 
     }
 }
