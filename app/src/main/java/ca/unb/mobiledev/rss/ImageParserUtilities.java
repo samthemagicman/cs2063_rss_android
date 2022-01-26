@@ -19,12 +19,12 @@ public class ImageParserUtilities
     public static class RetrieveImageTask extends AsyncTask<String, Void, Boolean>
     {
         private OnTaskCompleted listener;
-        private KijijiParser.DataModel model;
+        private KijijiParser.KijijiItem item;
 
-        public RetrieveImageTask(KijijiParser.DataModel model, OnTaskCompleted listener)
+        public RetrieveImageTask(KijijiParser.KijijiItem item, OnTaskCompleted listener)
         {
             this.listener = listener;
-            this.model = model;
+            this.item = item;
         }
 
         @Override
@@ -34,14 +34,14 @@ public class ImageParserUtilities
             InputStream in = null;
             URL url = null;
             try {
-                url = new URL((String)model.entryModel.get(RssParserUtilities.GlobalTags.enclosure));
+                url = new URL(item.bitmapLink);
 
                 HttpsURLConnection httpCon = (HttpsURLConnection)  url.openConnection();
                 httpCon.setDoInput(true);
                 httpCon.connect();
                 in = httpCon.getInputStream();
 
-                model.imageBitmap = BitmapFactory.decodeStream(in);
+                item.bitmapImage = BitmapFactory.decodeStream(in);
                 in.close();
 
                 return true;

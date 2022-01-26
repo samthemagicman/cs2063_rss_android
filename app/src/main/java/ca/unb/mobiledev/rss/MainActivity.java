@@ -22,7 +22,7 @@ public class MainActivity extends AppCompatActivity
 {
 
     Button getResponseButton;
-    List<KijijiParser.DataModel> m_items;
+    KijijiParser.KijijiRssPackage kijijiRssPackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +52,10 @@ public class MainActivity extends AppCompatActivity
                     {
                         try
                         {
-                            m_items =  KijijiParser.parseRssFeed(response);
+                            kijijiRssPackage =  KijijiParser.ParseRssFeed(response);
 
                             Intent intent = new Intent(MainActivity.this, ListingActivity.class);
-                            intent.putExtra("rssItems", (Serializable) m_items);
+                            intent.putExtra("rssItems", (Serializable) kijijiRssPackage);
                             startActivity(intent);
                         }
                         catch (Exception e)

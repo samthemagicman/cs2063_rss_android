@@ -14,18 +14,13 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.util.Log;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
 public class ListingActivity extends AppCompatActivity implements OnTaskCompleted, LocationListener {
 
     private ListAdapter listAdapter;
-    private List<KijijiParser.DataModel> m_list;
+    private KijijiParser.KijijiRssPackage m_list;
     private LocationManager locationManager;
 
     @Override
@@ -33,7 +28,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing);
 
-        m_list = (List<KijijiParser.DataModel>) getIntent().getSerializableExtra("rssItems");
+        m_list = (KijijiParser.KijijiRssPackage) getIntent().getSerializableExtra("rssItems");
 
         RequestImagesInBackground();
         initRecyclerView();
@@ -66,10 +61,11 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
     private void RequestImagesInBackground()
     {
+        // FIXME: - Need to get images somehow... someway... who knows how? Here or back in the kijiji parsing area.
         // Get the images in the background because they have not been downloaded and processed yet.
-        for (KijijiParser.DataModel item : m_list) {
+        for (KijijiParser.KijijiItem item : m_list.items) {
             ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
-            task.execute((String) item.entryModel.get(RssParserUtilities.GlobalTags.enclosure));
+            task.execute(item.bitmapLink);
         }
     }
 

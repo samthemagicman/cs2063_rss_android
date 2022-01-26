@@ -51,7 +51,10 @@ public final class RssParserUtilities
 
     public static void parseEntry(XmlPullParser parser, LinkedHashMap<GlobalTags, Object> parserMap) throws IOException, XmlPullParserException
     {
-        while(parser.next() != XmlPullParser.END_TAG) {
+        int totalFound = 0;
+        int totalRequired = parserMap.entrySet().size();
+
+        while(parser.next() != XmlPullParser.END_TAG && totalFound != totalRequired) {
             if (parser.getEventType() != XmlPullParser.START_TAG) { continue; }
 
             GlobalTags xmlTagEnum = GlobalTags.toEnum(parser.getName());
@@ -98,6 +101,8 @@ public final class RssParserUtilities
 
             if(!didFindMatch)
                 skipTag(parser);
+            else
+                totalFound += 1;
         }
     }
 

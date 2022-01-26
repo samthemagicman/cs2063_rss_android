@@ -1,60 +1,32 @@
 package ca.unb.mobiledev.rss;
 
-import android.Manifest;
-import android.app.Activity;
-import android.content.AsyncQueryHandler;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
-import android.os.AsyncTask;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-
-import java.io.InputStream;
-import java.lang.reflect.Array;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
 
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
-    private List<KijijiParser.DataModel> m_items;
+    private KijijiParser.KijijiRssPackage kijijiPackage;
     private Context m_context;
     private int selectedIndex = -1;
-    private Location m_location = null;
+    private Location m_currentDeviceLocation = null;
 
 
-    public ListAdapter(List<KijijiParser.DataModel> items, Context context) {
-        this.m_items = items;
+    public ListAdapter(KijijiParser.KijijiRssPackage kijijiPackage, Context context) {
+        this.kijijiPackage = kijijiPackage;
         this.m_context = context;
     }
 
@@ -73,64 +45,38 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         int currentPos = position;
 
-        if (m_items.isEmpty()) return;
+        if (kijijiPackage.items.isEmpty()) return;
 
-        KijijiParser.DataModel item = m_items.get(position);
-
-        //TODO: - Validation for each item - Maybe these should be in their own
-        // methods.
-
-        // Info
-        String title = (String) item.entryModel.get(RssParserUtilities.GlobalTags.title);
-        String description = (String) item.entryModel.get(RssParserUtilities.GlobalTags.description);
+        KijijiParser.KijijiItem item = kijijiPackage.items.get(position);
 
         // Cost
-        String cost = (String) item.entryModel.get(RssParserUtilities.GlobalTags.price);
+        String cost = item.price;
         String costStr = "Cost: $" + cost.split("\\.")[0]; // Lets get rid of cents.
 
-        // Date
-        String date = (String) item.entryModel.get(RssParserUtilities.GlobalTags.dcDate);
-        String dateToPrint = "Days: N/A";
-        try {
-            Date dateTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(date);
-            SimpleDateFormat a = new SimpleDateFormat("dd/MM/yy");
+        // Days Posted
+        Date current = new Date();
+        Date itemPostedDate = item.dateTimestamp;
+        int diffInDays = (int)(current.getTime() - itemPostedDate.getTime()) / ((1000 * 60 * 60 * 24));
+        String daysToPrint = "Days: " + diffInDays;
 
-            Date current = new Date();
-
-            int diffInDays = (int)( (current.getTime() - dateTime.getTime())
-                    / (1000 * 60 * 60 * 24) );
-
-            //dateToPrint = a.format(dateTime);
-            dateToPrint = "Days: " + diffInDays;
-
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-
-        //Location
-        String distance = "Dist: N/A";
-        if(m_location != null)
-        {
-            Location deviceLocation = m_location;
-            Location itemLocation = new Location("item");
-            itemLocation.setLatitude(Double.parseDouble(item.entryModel.get(RssParserUtilities.GlobalTags.lat).toString()));
-            itemLocation.setLongitude(Double.parseDouble(item.entryModel.get(RssParserUtilities.GlobalTags.lon).toString()));
-
-            double dist = deviceLocation.distanceTo(itemLocation)/1000; //distance = km
-            String conv = String.format("%.2f", dist);
-            distance = "Dist: " + conv + "km";
-        }
+        //Distance To Item
+        Location itemLocation = new Location("ItemLocation");
+        itemLocation.setLatitude(item.lat);
+        itemLocation.setLongitude(item.lon);
+        Location deviceLocation = m_currentDeviceLocation;
+        double dist = (deviceLocation != null) ? deviceLocation.distanceTo(itemLocation) / 1000 : 0.0 ;//dist in km
+        String distToPrint = "Dist: " + String.format("%.2f", dist) + "km";
 
         // Set our items to display the content
-            holder.titleView.setText(title);
-            holder.descriptionView.setText(description);
-            holder.imageView.setImageBitmap(item.imageBitmap);
+            holder.titleView.setText(item.title);
+            holder.descriptionView.setText(item.description);
+            holder.imageView.setImageBitmap(item.bitmapImage);
             holder.costView.setText(costStr);
-            holder.distanceView.setText(distance);
-            holder.dateView.setText(dateToPrint);
+            holder.distanceView.setText(distToPrint);
+            holder.dateView.setText(daysToPrint);
 
 
-        //Click Listener
+        //Click Listener - update selection color and launch external webpage.
         holder.parentLayout.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -139,7 +85,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 // Show item in external browser
                 if(selectedIndex == currentPos) // User double clicked
                 {
-                    ShowExternalBrowser(item.entryModel.get(RssParserUtilities.GlobalTags.link).toString());
+                    ShowExternalBrowser(item.link);
                 }
 
                 notifyItemChanged(selectedIndex);
@@ -170,7 +116,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public void updateCurrentDeviceLocation(Location location)
     {
-        m_location = location;
+        m_currentDeviceLocation = location;
 
         //TODO: - make this smarter and only update the requierd components and not the whole view.
         this.notifyDataSetChanged();
@@ -179,7 +125,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        return m_items.size();
+        return kijijiPackage.items.size();
     }
 
     // Holds each TableViewCell view in memory so it can be added to the list when needed.
