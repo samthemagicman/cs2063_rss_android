@@ -3,12 +3,16 @@ package ca.unb.mobiledev.rss;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -203,6 +207,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
                     m_currentPackage = newPackage;
                     // We have a new package and should notify the user
                     // Update current table.
+                    DoNotification();
                 }
             }
         }
@@ -211,8 +216,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             //TODO: - Handle correctly with meesage to user.
             e.printStackTrace();
         }
-
-
     }
 
     @Override
@@ -220,5 +223,20 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     {
         Log.d("VolleyError: " , error.toString());
         //TODO: - do something here like show error text in View
+    }
+
+    private void DoNotification()
+    {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this); 
+        builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_light);
+        builder.setContentTitle("New Items posted to your rss feed"); 
+        builder.setContentTitle("The Item XXX has been added - Maybe I should also update you on price changes?");
+        // builder.addAction() - //TODO: - We should be able to show the user the current item in our list...
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        int notificationID = 0; //Allows you to update the notification later on.
+        notificationManager.notify(notificationID, builder.build());
+        
     }
 }
