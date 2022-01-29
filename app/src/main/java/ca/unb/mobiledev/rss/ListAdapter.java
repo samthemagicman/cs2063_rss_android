@@ -122,9 +122,17 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         this.notifyDataSetChanged();
     }
 
+    public void setData(KijijiParser.KijijiRssPackage data)
+    {
+        kijijiPackage = data;
+    }
+
 
     @Override
-    public int getItemCount() {
+    public int getItemCount()
+    {
+        if(kijijiPackage == null) return 0;
+
         return kijijiPackage.items.size();
     }
 

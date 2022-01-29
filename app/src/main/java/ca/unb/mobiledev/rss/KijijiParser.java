@@ -20,7 +20,7 @@ import java.util.Date;
 
 public class KijijiParser
 {
-    public static class KijijiItem implements Serializable
+    public static class KijijiItem implements Serializable, Comparable<KijijiItem>
     {
         String title = "";
         String link = "";
@@ -33,6 +33,16 @@ public class KijijiParser
         String price = "";
 
         Bitmap bitmapImage = null;
+
+        @Override
+        public int compareTo(KijijiItem o) {
+            boolean titleMatch = this.title.equals(o.title);
+            boolean linkMatch = this.link.equals(o.link);
+            boolean dateMatch = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() ) == 0.0;
+
+            if(titleMatch && linkMatch && dateMatch) return 0;
+            else return 1;
+        }
     }
 
     public static class KijijiRssPackage implements Serializable

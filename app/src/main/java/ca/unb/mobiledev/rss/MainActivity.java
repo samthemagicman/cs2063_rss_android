@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,13 +17,17 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
-public class MainActivity extends AppCompatActivity
-{
 
+public class MainActivity extends AppCompatActivity{
     Button getResponseButton;
-    KijijiParser.KijijiRssPackage kijijiRssPackage;
+
+    KijijiParser.KijijiRssPackage m_currentPackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,50 +40,16 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View view) {
                 String url ="https://www.kijiji.ca/rss-srp-fredericton/test/k0l1700018";
-                GetItemsFromRssUrlAndLaunchListView(url);
+                ArrayList<String> rssUrlList = new ArrayList<>();
+                {
+                    rssUrlList.add(url);
+                }
+
+                Intent intent = new Intent(MainActivity.this, ListingActivity.class);
+                intent.putExtra("rssUrlList", rssUrlList);
+                startActivity(intent);
             }
         });
-    }
-
-    private void GetItemsFromRssUrlAndLaunchListView(String url)
-    {
-        RequestQueue queue = Volley.newRequestQueue(this);
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>()
-                {
-                    @Override
-                    public void onResponse(String response)
-                    {
-                        try
-                        {
-                            kijijiRssPackage =  KijijiParser.ParseRssFeed(response);
-
-                            Intent intent = new Intent(MainActivity.this, ListingActivity.class);
-                            intent.putExtra("rssItems", (Serializable) kijijiRssPackage);
-                            startActivity(intent);
-                        }
-                        catch (Exception e)
-                        {
-                            //TODO: - We should inform the user that we couldnt get the
-                            // data from the url
-                            e.printStackTrace();
-                        }
-                    }
-                },
-                new Response.ErrorListener()
-                {
-                    @Override
-                    public void onErrorResponse(VolleyError error)
-                    {
-                        //TODO: - We should inform the user that we couldnt get the
-                        // data from the url
-                        assert(false);
-                        Log.d("RssNoResponse:", "ERROR");
-                    }
-                });
-
-        queue.add(stringRequest);
     }
 
     @Override
