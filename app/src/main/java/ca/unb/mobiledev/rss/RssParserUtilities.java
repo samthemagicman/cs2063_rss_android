@@ -1,5 +1,7 @@
 package ca.unb.mobiledev.rss;
 
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -135,7 +137,11 @@ public final class RssParserUtilities
         parser.require(XmlPullParser.START_TAG, null, tag);
         String item = parseText(parser);
         parser.require(XmlPullParser.END_TAG, null, tag);
-        return item;
+
+        // Clea-up any escaped characters - non xml supported chars (ie &amp:#8711;)
+        String cleaned = Html.fromHtml(item).toString();
+
+        return cleaned;
     }
 
     protected static void parseGenericAsString(XmlPullParser parser, String tag, LinkedHashMap.Entry<GlobalTags, Object> item) throws IOException, XmlPullParserException
