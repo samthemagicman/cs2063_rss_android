@@ -24,7 +24,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -35,7 +34,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     private KijijiParser.KijijiRssPackage m_currentPackage;
     private LocationManager locationManager;
 
-    private Timer updateRssTimer;
+    private Timer updateRssTimer = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,12 +174,28 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             else
             {
                 KijijiParser.KijijiRssPackage.FeedUpdateInfo updateInfo =
-                        KijijiParser.KijijiRssPackage.UpdateExistingFromNewFeed(m_currentPackage, newPackage);
+                        KijijiParser.KijijiRssPackage.UpdateNewPackageFromExisting(m_currentPackage, newPackage);
+
+                m_currentPackage = newPackage;
 
                 if(updateInfo.hasUpdates())
                 {
-                    DoNotification();
+
                     Log.d("NEW ITEMS", "NEW ITEMS EMIT NOTIFICATION");
+
+                    //FIXME: - Create string with updates vs new Items
+                    String str = "";
+                    for(KijijiParser.KijijiItem item: m_currentPackage.items)
+                    {
+                        if(item.isUpdated)
+                            str = str + item.title + "\n";
+                    }
+
+                    if(!str.isEmpty())
+                        DoNotification(str);
+
+                    listAdapter.setData(m_currentPackage);
+
                     listAdapter.notifyDataSetChanged();
                 }
             }
@@ -199,10 +214,10 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         //TODO: - do something here like show error text in View
     }
 
-    private void DoNotification()
+    private void DoNotification(String infoText)
     {
         Notifier notify = new Notifier(this);
         notify.postNotification("RSS Update",
-               "New Items Updated");
+               infoText);
     }
 }

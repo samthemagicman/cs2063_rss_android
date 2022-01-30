@@ -40,9 +40,11 @@ public class MainActivity extends AppCompatActivity{
             @Override
             public void onClick(View view) {
                 String url ="https://www.kijiji.ca/rss-srp-fredericton/test/k0l1700018";
+                String urlToronto = "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272";
                 ArrayList<String> rssUrlList = new ArrayList<>();
                 {
-                    rssUrlList.add(url);
+                    //rssUrlList.add(url);
+                    rssUrlList.add(urlToronto);
                 }
 
                 Intent intent = new Intent(MainActivity.this, ListingActivity.class);

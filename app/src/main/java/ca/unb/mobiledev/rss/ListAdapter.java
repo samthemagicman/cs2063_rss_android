@@ -75,6 +75,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.distanceView.setText(distToPrint);
             holder.dateView.setText(daysToPrint);
 
+            boolean shouldShowNotViewedIcon = item.isUpdated || !item.userHasViewed;
+            holder.updateNotificationIcon.setVisibility((shouldShowNotViewedIcon) ? View.VISIBLE : View.INVISIBLE);
+
 
         //Click Listener - update selection color and launch external webpage.
         holder.parentLayout.setOnClickListener(new View.OnClickListener()
@@ -87,6 +90,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 {
                     ShowExternalBrowser(item.link);
                 }
+
+                item.userHasViewed = true;
 
                 notifyItemChanged(selectedIndex);
                 selectedIndex = currentPos;
@@ -141,6 +146,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         // Declare all our items that is in each recycler cell.
         ImageView imageView;
+        ImageView updateNotificationIcon;
         TextView titleView;
         TextView descriptionView;
         TextView costView;
@@ -153,6 +159,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
             // Attach the widgets to their Ids
             imageView = itemView.findViewById(R.id.image);
+            updateNotificationIcon = itemView.findViewById(R.id.update_notification_icon);
             titleView = itemView.findViewById(R.id.text_title);
             descriptionView = itemView.findViewById(R.id.text_desc);
             costView = itemView.findViewById(R.id.cost_desc);

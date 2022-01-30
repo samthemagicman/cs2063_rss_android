@@ -1,7 +1,6 @@
 package ca.unb.mobiledev.rss;
 
 import android.graphics.Bitmap;
-import android.location.Location;
 import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -35,26 +34,22 @@ public class KijijiParser
         Bitmap bitmapImage = null;
 
         boolean isUpdated = false; //This indicates that the item has been updated from a new feed
+        boolean userHasViewed = false; // This indicates the user has viewed and accepted the items.
 
         @Override
-        public int compareTo(KijijiItem o) {
-            //boolean titleMatch = this.title.equals(o.title);
+        public int compareTo(KijijiItem o)
+        {
             boolean linkMatch = this.link.equals(o.link);
-           //boolean dateMatch = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() ) == 0.0;
-           // boolean priceMatch = this.price.equals(o.price);
-
             if(linkMatch) return 0;
             else return 1;
         }
 
         public boolean isSameItem(KijijiItem o)
         {
-            boolean dateMatch = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() ) == 0.0;
             return (this.link.equals(o.link));
-
         }
 
-        public boolean itemHasUpdates(KijijiItem o)
+        public boolean itemHasBeenUpdatedOnline(KijijiItem o)
         {
             boolean isSameItem = isSameItem(o);
             boolean hasPriceUpdate = !this.price.equals(o.price);
@@ -113,33 +108,32 @@ public class KijijiParser
             public boolean hasUpdates() {return this.newItemsCount > 0 || this.updatedItemsCount > 0;}
         }
 
-        public static FeedUpdateInfo UpdateExistingFromNewFeed(KijijiRssPackage originalPackage, KijijiRssPackage newPackage)
+        public static FeedUpdateInfo UpdateNewPackageFromExisting(KijijiRssPackage originalPackage, KijijiRssPackage newPackage)
         {
             FeedUpdateInfo updateInfo = new FeedUpdateInfo();
 
-            for(KijijiParser.KijijiItem newItem: newPackage.items)
-            {
+            for(KijijiParser.KijijiItem newItem: newPackage.items) {
                 boolean hasMatch = false;
-                int indexCount = 0;
-                for(KijijiParser.KijijiItem oldItem : originalPackage.items)
-                {
+                for (KijijiParser.KijijiItem oldItem : originalPackage.items) {
                     hasMatch = newItem.isSameItem(oldItem);
-                    if(hasMatch)
+                    if (hasMatch)
                     {
-                        if(newItem.itemHasUpdates(oldItem))
+                        //Copy over user has viewed flags
+                        newItem.userHasViewed = oldItem.userHasViewed;
+
+                        if(newItem.itemHasBeenUpdatedOnline(oldItem))
                         {
-                            newItem.isUpdated = true;
-                            originalPackage.items.set(indexCount, newItem);
                             updateInfo.updatedItemsCount += 1;
+                            newItem.isUpdated = true;
+                            newItem.userHasViewed = false;
                         }
                         break;
                     }
-
-                    indexCount += 1;
                 }
 
-                if(!hasMatch)
+                if (!hasMatch)
                 {
+                    newItem.userHasViewed = false;
                     updateInfo.newItemsCount += 1;
                 }
             }
