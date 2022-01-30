@@ -34,18 +34,37 @@ public class KijijiParser
 
         Bitmap bitmapImage = null;
 
+        boolean isUpdated = false; //This indicates that the item has been updated from a new feed
+
         @Override
         public int compareTo(KijijiItem o) {
-            boolean titleMatch = this.title.equals(o.title);
+            //boolean titleMatch = this.title.equals(o.title);
             boolean linkMatch = this.link.equals(o.link);
-            boolean dateMatch = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() ) == 0.0;
+           //boolean dateMatch = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() ) == 0.0;
+           // boolean priceMatch = this.price.equals(o.price);
 
-            if(titleMatch && linkMatch && dateMatch) return 0;
+            if(linkMatch) return 0;
             else return 1;
+        }
+
+        public boolean isSameItem(KijijiItem o)
+        {
+            boolean dateMatch = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() ) == 0.0;
+            return (this.link.equals(o.link));
+
+        }
+
+        public boolean itemHasUpdates(KijijiItem o)
+        {
+            boolean isSameItem = isSameItem(o);
+            boolean hasPriceUpdate = !this.price.equals(o.price);
+            boolean hasDateUpdate = (this.dateTimestamp.getTime() - o.dateTimestamp.getTime() != 0);
+
+            return isSameItem && (hasPriceUpdate || hasDateUpdate);
         }
     }
 
-    public static class KijijiRssPackage implements Serializable
+    public static class KijijiRssPackage
     {
         ArrayList<KijijiItem> items = new ArrayList<>();
         Date feedPublicationDate = new Date();
@@ -84,6 +103,48 @@ public class KijijiParser
             } catch (ParseException e) {
                 e.printStackTrace();
             }
+        }
+
+        public static class FeedUpdateInfo
+        {
+            public int newItemsCount = 0;
+            public int updatedItemsCount = 0;
+
+            public boolean hasUpdates() {return this.newItemsCount > 0 || this.updatedItemsCount > 0;}
+        }
+
+        public static FeedUpdateInfo UpdateExistingFromNewFeed(KijijiRssPackage originalPackage, KijijiRssPackage newPackage)
+        {
+            FeedUpdateInfo updateInfo = new FeedUpdateInfo();
+
+            for(KijijiParser.KijijiItem newItem: newPackage.items)
+            {
+                boolean hasMatch = false;
+                int indexCount = 0;
+                for(KijijiParser.KijijiItem oldItem : originalPackage.items)
+                {
+                    hasMatch = newItem.isSameItem(oldItem);
+                    if(hasMatch)
+                    {
+                        if(newItem.itemHasUpdates(oldItem))
+                        {
+                            newItem.isUpdated = true;
+                            originalPackage.items.set(indexCount, newItem);
+                            updateInfo.updatedItemsCount += 1;
+                        }
+                        break;
+                    }
+
+                    indexCount += 1;
+                }
+
+                if(!hasMatch)
+                {
+                    updateInfo.newItemsCount += 1;
+                }
+            }
+
+            return updateInfo;
         }
     }
 
@@ -150,6 +211,4 @@ public class KijijiParser
 
         return kijijiPackage;
     }
-
-
 }

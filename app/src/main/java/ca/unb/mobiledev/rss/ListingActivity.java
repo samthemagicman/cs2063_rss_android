@@ -3,17 +3,12 @@ package ca.unb.mobiledev.rss;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationManager;
-import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
@@ -28,7 +23,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
@@ -180,38 +174,14 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             }
             else
             {
-                // Lets see if the time was updated
-                Date currentPackageDate = m_currentPackage.feedPublicationDate;
-                Date newPackageDate = newPackage.feedPublicationDate;
+                KijijiParser.KijijiRssPackage.FeedUpdateInfo updateInfo =
+                        KijijiParser.KijijiRssPackage.UpdateExistingFromNewFeed(m_currentPackage, newPackage);
 
-                long deltaTime = newPackageDate.getTime() - currentPackageDate.getTime();
-
-                if(deltaTime > 0.0)
+                if(updateInfo.hasUpdates())
                 {
-                    int newItemCount = 0;
-                    // Lets check all our samples for new items
-                    for(KijijiParser.KijijiItem newItem: newPackage.items)
-                    {
-                        boolean hasMatch = false;
-                        for(KijijiParser.KijijiItem oldItem: m_currentPackage.items)
-                        {
-                            hasMatch = newItem.compareTo(oldItem) == 0;
-                            if(hasMatch) break;
-                        }
-                        if(!hasMatch) newItemCount += 1;
-                    }
-
-                    if(newItemCount > 0)
-                    {
-                        Log.d("NEW ITEMS", "NEW ITEMS EMIT NOTIFICATION");
-                        listAdapter.notifyDataSetChanged();
-                    }
-
-                    //TODO: - Add last updated time to top of Activity window in Seconds.
-                    m_currentPackage = newPackage;
-                    // We have a new package and should notify the user
-                    // Update current table.
                     DoNotification();
+                    Log.d("NEW ITEMS", "NEW ITEMS EMIT NOTIFICATION");
+                    listAdapter.notifyDataSetChanged();
                 }
             }
         }
