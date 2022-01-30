@@ -57,6 +57,11 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             return;
         }
 
+        if(savedInstanceState != null)
+        {
+            m_currentPackage = (KijijiParser.KijijiRssPackage) savedInstanceState.getSerializable("packageItems");
+        }
+
         initRecyclerView();
     }
 
@@ -106,7 +111,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     }
 
 
-
     private void RequestImagesInBackground(KijijiParser.KijijiRssPackage rssPackage)
     {
         // FIXME: - Need to get images somehow... someway... who knows how? Here or back in the kijiji parsing area.
@@ -116,7 +120,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             task.execute(item.bitmapLink);
         }
     }
-
 
     // When the images have been loaded from the webpage,
     // we need to update our recycler view - this is how we do it.
@@ -128,6 +131,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         listAdapter.notifyDataSetChanged();
     }
 
+    // Location Listeners
     @Override
     public void onLocationChanged(@NonNull Location location)
     {
@@ -227,16 +231,8 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
     private void DoNotification()
     {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this); 
-        builder.setSmallIcon(R.drawable.common_google_signin_btn_icon_light);
-        builder.setContentTitle("New Items posted to your rss feed"); 
-        builder.setContentTitle("The Item XXX has been added - Maybe I should also update you on price changes?");
-        // builder.addAction() - //TODO: - We should be able to show the user the current item in our list...
-
-        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        int notificationID = 0; //Allows you to update the notification later on.
-        notificationManager.notify(notificationID, builder.build());
-        
+        Notifier notify = new Notifier(this);
+        notify.postNotification("RSS Update",
+               "New Items Updated");
     }
 }
