@@ -19,9 +19,9 @@ public class ImageParserUtilities
     public static class RetrieveImageTask extends AsyncTask<String, Void, Boolean>
     {
         private OnTaskCompleted listener;
-        private KijijiParser.KijijiItem item;
+        private BaseItem item;
 
-        public RetrieveImageTask(KijijiParser.KijijiItem item, OnTaskCompleted listener)
+        public RetrieveImageTask(BaseItem item, OnTaskCompleted listener)
         {
             this.listener = listener;
             this.item = item;

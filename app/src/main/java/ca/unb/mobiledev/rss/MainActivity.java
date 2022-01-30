@@ -27,7 +27,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity{
     Button getResponseButton;
 
-    KijijiParser.KijijiRssPackage m_currentPackage;
+    BaseItemsPackage m_currentPackage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

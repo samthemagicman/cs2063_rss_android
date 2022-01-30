@@ -19,13 +19,13 @@ import java.util.Date;
 
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
-    private KijijiParser.KijijiRssPackage kijijiPackage;
+    private BaseItemsPackage kijijiPackage;
     private Context m_context;
     private int selectedIndex = -1;
     private Location m_currentDeviceLocation = null;
 
 
-    public ListAdapter(KijijiParser.KijijiRssPackage kijijiPackage, Context context) {
+    public ListAdapter(BaseItemsPackage kijijiPackage, Context context) {
         this.kijijiPackage = kijijiPackage;
         this.m_context = context;
     }
@@ -47,7 +47,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         if (kijijiPackage.items.isEmpty()) return;
 
-        KijijiParser.KijijiItem item = kijijiPackage.items.get(position);
+        BaseItem item = kijijiPackage.items.get(position);
 
         // Cost
         String cost = item.price;
@@ -127,7 +127,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         this.notifyDataSetChanged();
     }
 
-    public void setData(KijijiParser.KijijiRssPackage data)
+    public void setData(BaseItemsPackage data)
     {
         kijijiPackage = data;
     }

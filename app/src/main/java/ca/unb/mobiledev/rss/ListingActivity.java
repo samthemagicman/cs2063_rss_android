@@ -31,7 +31,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
     private ListAdapter listAdapter;
     private ArrayList<String> m_rssUrlList;
-    private KijijiParser.KijijiRssPackage m_currentPackage;
+    private BaseItemsPackage m_currentPackage;
     private LocationManager locationManager;
 
     private Timer updateRssTimer = null;
@@ -52,7 +52,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
         if(savedInstanceState != null)
         {
-            m_currentPackage = (KijijiParser.KijijiRssPackage) savedInstanceState.getSerializable("packageItems");
+            m_currentPackage = (BaseItemsPackage) savedInstanceState.getSerializable("packageItems");
         }
 
         initRecyclerView();
@@ -104,11 +104,11 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     }
 
 
-    private void RequestImagesInBackground(KijijiParser.KijijiRssPackage rssPackage)
+    private void RequestImagesInBackground(BaseItemsPackage rssPackage)
     {
         // FIXME: - Need to get images somehow... someway... who knows how? Here or back in the kijiji parsing area.
         // Get the images in the background because they have not been downloaded and processed yet.
-        for (KijijiParser.KijijiItem item : rssPackage.items) {
+        for (BaseItem item : rssPackage.items) {
             ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
             task.execute(item.bitmapLink);
         }
@@ -161,8 +161,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         String rssFeed = (String) response;
         // TODO: - do this in background or we get small delay when counting for updates
         try{
-            KijijiParser.KijijiRssPackage newPackage = KijijiParser.ParseRssFeed(rssFeed);
-
+            BaseItemsPackage newPackage = KijijiParser.getItemsFromKijiji(rssFeed);
             RequestImagesInBackground(newPackage);
 
             if(m_currentPackage == null)
@@ -173,19 +172,17 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             }
             else
             {
-                KijijiParser.KijijiRssPackage.FeedUpdateInfo updateInfo =
-                        KijijiParser.KijijiRssPackage.UpdateNewPackageFromExisting(m_currentPackage, newPackage);
-
+                // Copy over hasViewd and new booleans.
+                BaseItemsPackage.FeedUpdateInfo updateInfo = newPackage.UpdateFromAnotherPackage(m_currentPackage);
                 m_currentPackage = newPackage;
 
                 if(updateInfo.hasUpdates())
                 {
-
                     Log.d("NEW ITEMS", "NEW ITEMS EMIT NOTIFICATION");
 
                     //FIXME: - Create string with updates vs new Items
                     String str = "";
-                    for(KijijiParser.KijijiItem item: m_currentPackage.items)
+                    for(BaseItem item: m_currentPackage.items)
                     {
                         if(item.isUpdated)
                             str = str + item.title + "\n";
