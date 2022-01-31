@@ -75,6 +75,7 @@ public class KijijiItemPackage extends BaseItemsPackage
                         updateInfo.updatedItemsCount += 1;
                         newItem.isUpdated = true;
                         newItem.userHasViewed = false;
+                        newItem.bitmapImage = oldItem.bitmapImage;
                     }
                     break;
                 }

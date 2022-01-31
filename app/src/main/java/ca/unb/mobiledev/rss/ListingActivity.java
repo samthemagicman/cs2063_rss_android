@@ -50,11 +50,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             return;
         }
 
-        if(savedInstanceState != null)
-        {
-            m_currentPackage = (BaseItemsPackage) savedInstanceState.getSerializable("packageItems");
-        }
-
         initRecyclerView();
     }
 
@@ -109,6 +104,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         // FIXME: - Need to get images somehow... someway... who knows how? Here or back in the kijiji parsing area.
         // Get the images in the background because they have not been downloaded and processed yet.
         for (BaseItem item : rssPackage.items) {
+            if (item.bitmapImage != null) continue; //Dont try to load the image for something that already exists
             ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
             task.execute(item.bitmapLink);
         }
