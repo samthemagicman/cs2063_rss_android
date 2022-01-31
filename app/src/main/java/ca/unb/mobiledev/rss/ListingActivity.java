@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -64,6 +65,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
         //ParseTheRssDataFromUrl(m_rssUrlList.get(0));
 
+        // TODO: - Move this timer into its on method so we can start and stop it.
         //Lets check for updates on the RssStream and then notify.
         // Do task over and over
         int delay = 0;
@@ -78,13 +80,45 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
 
         // Get the current location of the device
         locationManager = (LocationManager) getSystemService(this.LOCATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+        boolean accessFineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean accessCourseLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if (!accessFineLocation && !accessCourseLocation)
+        {
             ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
         }
+        else
+        {
+           DoRunGetLocationLoop();
+        }
+    }
 
-        // TODO: - This is probably not safe. Clear my own permissions and retry with no and see what happens.
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
-        Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+    private void DoRunGetLocationLoop()
+    {
+        boolean accessFineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        boolean accessCourseLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+
+        if(accessFineLocation && accessCourseLocation)
+        {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
+            Location loc = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+    }
+
+    // This is where the user says we can use the gps.
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
+        {
+            DoRunGetLocationLoop();
+        }
+        else
+        {
+            //TODO: - Inform User.
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -100,7 +134,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_menu, menu);
         return super.onCreateOptionsMenu(menu);
-
     }
 
     @Override
