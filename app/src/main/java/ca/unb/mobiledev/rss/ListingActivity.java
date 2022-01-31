@@ -9,11 +9,13 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -87,6 +89,7 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         super.onStop();
         updateRssTimer.cancel();
         updateRssTimer = null;
+        SaveViewingHistoryItems();
     }
 
     private void initRecyclerView()
@@ -163,8 +166,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
             if(m_currentPackage == null)
             {
                 m_currentPackage = newPackage;
-                listAdapter.setData(m_currentPackage);
-                listAdapter.notifyDataSetChanged();
             }
             else
             {
@@ -180,18 +181,19 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
                     String str = "";
                     for(BaseItem item: m_currentPackage.items)
                     {
-                        if(item.isUpdated)
+                        if(item.showIndicator)
                             str = str + item.title + "\n";
                     }
 
-                    if(!str.isEmpty())
-                        DoNotification(str);
-
-                    listAdapter.setData(m_currentPackage);
-
-                    listAdapter.notifyDataSetChanged();
+                    DoNotification("New items are available on your RSS feed.");
                 }
             }
+
+            ApplyViewHistoryItemContentToCurrentContent();
+            listAdapter.setData(m_currentPackage);
+            listAdapter.notifyDataSetChanged();
+
+
         }
         catch(Exception e)
         {
@@ -207,10 +209,63 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         //TODO: - do something here like show error text in View
     }
 
+
+    // Sends system notification to user with info text.
     private void DoNotification(String infoText)
     {
         Notifier notify = new Notifier(this);
         notify.postNotification("RSS Update",
                infoText);
+    }
+
+
+    // Loads the last saved history and try to find out which items have already been viewed.
+    private void ApplyViewHistoryItemContentToCurrentContent()
+    {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        int size = sp.getInt("History_List_Size", 0);
+
+        if(size != 0)
+        {
+            ArrayList<String> viewedLinks = new ArrayList<>();
+            for(int i = 0; i < size; i++)
+            {
+                viewedLinks.add(sp.getString("Item_" + i, null));
+            }
+
+            for(BaseItem item: m_currentPackage.items)
+            {
+                for(String viewedLink: viewedLinks)
+                {
+                    if(item.link.equals(viewedLink))
+                    {
+                        item.showIndicator = false; //User has already seen this item.
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    // Saves the current viewing history - ie user has already viewed
+    // This saves the item.link and compares it on loading.
+    private boolean SaveViewingHistoryItems()
+    {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = sp.edit();
+
+        editor.clear();
+        editor.putInt("History_List_Size", m_currentPackage.items.size());
+
+        int i = 0;
+        for(BaseItem item: m_currentPackage.items)
+        {
+            if(item.showIndicator == false) // User has already seen this item;
+            {
+                editor.putString("Item_" + i++, item.link);
+            }
+        }
+
+        return editor.commit();
     }
 }

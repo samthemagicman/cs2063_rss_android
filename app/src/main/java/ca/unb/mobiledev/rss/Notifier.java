@@ -25,7 +25,7 @@ public class Notifier
         m_builder.setContentTitle(titleText);
         m_builder.setContentText(infoText);
 
-        int notificationID = m_lastUsedNotificationId += 1; //Allows you to update the notification later on.
+        int notificationID = m_lastUsedNotificationId; //Allows you to update the notification later on.
         m_manager.notify(notificationID, m_builder.build());
     }
 }

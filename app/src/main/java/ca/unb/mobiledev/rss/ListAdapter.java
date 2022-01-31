@@ -75,8 +75,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             holder.distanceView.setText(distToPrint);
             holder.dateView.setText(daysToPrint);
 
-            boolean shouldShowNotViewedIcon = item.isUpdated || !item.userHasViewed;
-            holder.updateNotificationIcon.setVisibility((shouldShowNotViewedIcon) ? View.VISIBLE : View.INVISIBLE);
+            holder.updateNotificationIcon.setVisibility((item.showIndicator) ? View.VISIBLE : View.INVISIBLE);
 
 
         //Click Listener - update selection color and launch external webpage.
@@ -91,7 +90,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                     ShowExternalBrowser(item.link);
                 }
 
-                item.userHasViewed = true;
+                item.showIndicator = false;
 
                 notifyItemChanged(selectedIndex);
                 selectedIndex = currentPos;

@@ -68,13 +68,12 @@ public class KijijiItemPackage extends BaseItemsPackage
                 if (hasMatch)
                 {
                     //Copy over user has viewed flags
-                    newItem.userHasViewed = oldItem.userHasViewed;
+                    newItem.showIndicator = oldItem.showIndicator;
 
                     if(newItem.itemHasBeenUpdatedOnline(oldItem))
                     {
                         updateInfo.updatedItemsCount += 1;
-                        newItem.isUpdated = true;
-                        newItem.userHasViewed = false;
+                        newItem.showIndicator = true;
                         newItem.bitmapImage = oldItem.bitmapImage;
                     }
                     break;
@@ -83,7 +82,7 @@ public class KijijiItemPackage extends BaseItemsPackage
 
             if (!hasMatch)
             {
-                newItem.userHasViewed = false;
+                newItem.showIndicator = true;
                 updateInfo.newItemsCount += 1;
             }
         }

@@ -19,8 +19,7 @@ public final class BaseItem implements Serializable, Comparable<BaseItem>
 
         Bitmap bitmapImage = null;
 
-        boolean isUpdated = false; //This indicates that the item has been updated from a new feed
-        boolean userHasViewed = false; // This indicates the user has viewed and accepted the items.
+        boolean showIndicator = true; // Indicator of new item
 
         @Override
         public int compareTo(BaseItem o)
