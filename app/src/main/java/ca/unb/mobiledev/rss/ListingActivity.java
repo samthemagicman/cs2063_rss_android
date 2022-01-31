@@ -17,6 +17,9 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -90,6 +93,38 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         updateRssTimer.cancel();
         updateRssTimer = null;
         SaveViewingHistoryItems();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.list_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item)
+    {
+        int id = item.getItemId();
+
+        //FIXME: - stop and start timer here. This might step all over itself.
+
+        if(id == R.id.menu_mark_all_as_viewed_button || id == R.id.menu_mark_all_as_new_button)
+        {
+            boolean showIndicator = (id == R.id.menu_mark_all_as_new_button) ? true : false;
+            for (int i = 0; i < m_currentPackage.items.size(); i++)
+            {
+                m_currentPackage.items.get(i).showIndicator = showIndicator;
+            }
+
+            // FIXME: - Be smarter!
+            SaveViewingHistoryItems();
+            listAdapter.notifyDataSetChanged();
+        }
+
+        return super.onOptionsItemSelected(item);
+
     }
 
     private void initRecyclerView()

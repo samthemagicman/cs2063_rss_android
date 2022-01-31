@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_mark_all_as_viewed_button"
+        android:title="Mark all as viewed" />
+
+    <item
+        android:id="@+id/menu_mark_all_as_new_button"
+        android:title="Mark all as new" />
+</menu>
