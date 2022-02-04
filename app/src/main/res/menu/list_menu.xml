@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_manual_refresh"
+        android:title="Refresh data" />
+
     <item
         android:id="@+id/menu_mark_all_as_viewed_button"
         android:title="Mark all as viewed" />
@@ -7,4 +11,36 @@
     <item
         android:id="@+id/menu_mark_all_as_new_button"
         android:title="Mark all as new" />
+
+    <item
+        android:id="@+id/menu_spinner"
+        android:title="Spinner"
+        app:actionViewClass="android.widget.Spinner"
+        app:showAsAction="always"
+        />
+
+<!--    <item android:id="@+id/RefreshRate"-->
+<!--        android:title="Refresh Rate">-->
+
+<!--        <menu>-->
+<!--            <item android:id="@+id/menu_refresh_1s"-->
+<!--                android:title="1s"/>-->
+
+<!--            <item android:id="@+id/menu_refresh_5s"-->
+<!--                android:title="5s"/>-->
+
+<!--            <item android:id="@+id/menu_refresh_10s"-->
+<!--                android:title="10s"/>-->
+
+<!--            <item android:id="@+id/menu_refresh_300s"-->
+<!--                android:title="30s"/>-->
+
+<!--            <item android:id="@+id/menu_refresh_60s"-->
+<!--                android:title="60s"/>-->
+
+<!--        </menu>-->
+<!--    </item>-->
+
+
+
 </menu>

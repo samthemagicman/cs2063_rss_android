@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="planets_array">
+        <item>5s</item>
+        <item>10s</item>
+        <item>15s</item>
+        <item>30s</item>
+        <item>60s</item>
+        <item>5m</item>
+        <item>30m</item>
+        <item>60m</item>
+    </string-array>
+</resources>
