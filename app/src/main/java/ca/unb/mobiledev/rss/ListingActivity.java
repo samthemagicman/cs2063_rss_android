@@ -2,46 +2,31 @@ package ca.unb.mobiledev.rss;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ListingActivity extends AppCompatActivity implements OnTaskCompleted, LocationListener, ParsingListener {
+public class ListingActivity extends AppCompatActivity implements ParsingListener, LocatorListener {
 
     private ListAdapter m_listAdapter;
     private ArrayList<String> m_rssUrlList;
     private BaseItemsPackage m_currentPackage;
-    private LocationManager m_locationManager;
+    private Locator m_locationLocator;
 
     private Timer m_updateRssTimer = null;
 
@@ -51,6 +36,8 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         setContentView(R.layout.activity_listing);
 
         m_rssUrlList = getIntent().getStringArrayListExtra("rssUrlList");
+
+        m_locationLocator = new Locator(this, this);
 
         if(m_rssUrlList.isEmpty())
         {
@@ -66,28 +53,18 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
     protected void onStart() {
         super.onStart();
 
+        m_locationLocator.startLocationServiceLoop(10000, 500);
+
         startRssParsingTimer(0, 10000);
 
-        startLocationManager();
 
-        boolean accessFineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean accessCourseLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if (!accessFineLocation && !accessCourseLocation)
-        {
-            ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
-        }
-        else
-        {
-           startLocationServicesLoop();
-        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         stopRssParsingTimer();
-        //TODO: - stop location services
+        m_locationLocator.stopLocationServiceLoop();
         SaveViewingHistoryItems();
     }
 
@@ -147,73 +124,6 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         view.setLayoutManager(new LinearLayoutManager(this));
     }
 
-    // INFO: - Location Manager (GPS) signal overrides.
-    // The following functions are the listeners for when the gps
-    // location is updated.
-    private void startLocationManager()
-    {
-        m_locationManager = (LocationManager) getSystemService(this.LOCATION_SERVICE);
-
-        boolean accessFineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean accessCourseLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if (!accessFineLocation && !accessCourseLocation)
-        {
-            ActivityCompat.requestPermissions((Activity) this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
-        }
-        else
-        {
-            startLocationServicesLoop();
-        }
-    }
-
-    private void startLocationServicesLoop()
-    {
-        if(m_locationManager == null) return;
-
-        boolean accessFineLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-        boolean accessCourseLocation = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
-
-        if(accessFineLocation && accessCourseLocation)
-        {
-            m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000L,500.0f, this);
-            Location loc = m_locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        }
-    }
-
-    // This is where the user says we can use the gps.
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
-    {
-        if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-        {
-            startLocationServicesLoop();
-        }
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    }
-
-    @Override
-    public void onLocationChanged(@NonNull Location location)
-    {
-        try {
-            if(m_listAdapter == null) return;
-            if(location == null) return;
-
-            m_listAdapter.updateCurrentDeviceLocation(location);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras)
-    {
-        //TODO: - if we dont override this we get terminal exception.
-        // maybe we should be doing something with this?
-    }
 
     // INFO - VOLLEY
     // The following  are the volley callbacks.
@@ -328,4 +238,9 @@ public class ListingActivity extends AppCompatActivity implements OnTaskComplete
         return editor.commit();
     }
 
+    @Override
+    public void onLocationUpdated(Location newLocation)
+    {
+        m_listAdapter.updateCurrentDeviceLocation(newLocation);
+    }
 }
