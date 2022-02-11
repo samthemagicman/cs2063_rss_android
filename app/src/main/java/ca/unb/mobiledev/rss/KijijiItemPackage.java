@@ -58,6 +58,32 @@ public class KijijiItemPackage extends BaseItemsPackage
     }
 
     @Override
+    public int MergePackage(BaseItemsPackage newPackage)
+    {
+        int indexesUpdatedCount = 0;
+        for(int i = newPackage.items.size() - 1; i >= 0; i--)
+        {
+            boolean hasMatch = false;
+            for(BaseItem item: this.items)
+            {
+                if(item.isSameItem(newPackage.items.get(i)))
+                {
+                    hasMatch = true;
+                    break;
+                }
+            }
+
+            if(!hasMatch)
+            {
+                this.items.add(0, newPackage.items.get(i));
+                indexesUpdatedCount += 1;
+            }
+        }
+
+        return indexesUpdatedCount;
+    }
+
+    @Override
     public BaseItemsPackage.FeedUpdateInfo UpdateFromAnotherPackage(BaseItemsPackage otherPackage) {
         FeedUpdateInfo updateInfo = new FeedUpdateInfo();
 

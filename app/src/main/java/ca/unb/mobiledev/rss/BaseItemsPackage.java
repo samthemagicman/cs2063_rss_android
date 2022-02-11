@@ -32,6 +32,8 @@ interface BaseItemsPackageInterface
 
     public BaseItemsPackage.FeedUpdateInfo UpdateFromAnotherPackage(BaseItemsPackage otherPackage);
 
+    public int MergePackage(BaseItemsPackage otherPackage);
+
     public BaseItemsPackage ParseRssFeed() throws IOException, XmlPullParserException;
 }
 
@@ -57,6 +59,12 @@ public class BaseItemsPackage implements BaseItemsPackageInterface
     @Override
     public void fillFromParsedModel(List<ParsingDataModel> dataModel, String feedPublicationDate) {
         return;
+    }
+
+    @Override
+    public int MergePackage(BaseItemsPackage otherPackage)
+    {
+        return 0;
     }
 
     @Override

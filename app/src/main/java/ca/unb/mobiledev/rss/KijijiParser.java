@@ -32,17 +32,17 @@ interface ParsingListener
     void onParsingCompleted(KijijiItemPackage pack);
 }
 
-public class KijijiParser implements Response.Listener, Response.ErrorListener, OnTaskCompleted
+public class KijijiParser implements Response.Listener, Response.ErrorListener
 {
     Context m_context;
     ParsingListener m_listener;
     KijijiItemPackage m_package;
+    int m_imagesCompleted = 0;
 
 
     public KijijiParser(Context context, ParsingListener listener) {
         this.m_context = context;
         this.m_listener = listener;
-
     }
 
     public void getRssFeed(String url)
@@ -58,7 +58,8 @@ public class KijijiParser implements Response.Listener, Response.ErrorListener, 
         try
         {
             m_package.ParseRssFeed();
-            GetImages();
+
+            m_listener.onParsingCompleted(m_package); // Emit that we got all the data but the images
         }
         catch (IOException e)
         {
@@ -67,18 +68,6 @@ public class KijijiParser implements Response.Listener, Response.ErrorListener, 
         catch (XmlPullParserException e)
         {
             e.printStackTrace();
-        }
-    }
-
-    private void GetImages()
-    {
-        for(int i = 0; i < m_package.items.size(); i++)
-        {
-            BaseItem item = m_package.items.get(i);
-            if(item.bitmapImage != null) continue;
-
-            ImageParserUtilities.RetrieveImageTask task = new ImageParserUtilities.RetrieveImageTask(item, this);
-            task.execute(item.bitmapLink);
         }
     }
 
@@ -91,11 +80,5 @@ public class KijijiParser implements Response.Listener, Response.ErrorListener, 
     public void onResponse(Object response)
     {
         getItemsFromKijiji( (String) response);
-    }
-
-    @Override
-    public void onImageDownloadCompleted()
-    {
-        m_listener.onParsingCompleted(m_package);
     }
 }

@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.media.Image;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -21,12 +22,13 @@ import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ListingActivity extends AppCompatActivity implements ParsingListener, LocatorListener {
+public class ListingActivity extends AppCompatActivity implements ParsingListener, LocatorListener, OnTaskCompleted {
 
     private ListAdapter m_listAdapter;
     private ArrayList<String> m_rssUrlList;
     private BaseItemsPackage m_currentPackage;
     private Locator m_locationLocator;
+    private RecyclerView m_listView;
 
     private Timer m_updateRssTimer = null;
 
@@ -56,8 +58,6 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         m_locationLocator.startLocationServiceLoop(10000, 500);
 
         startRssParsingTimer(0, 10000);
-
-
     }
 
     @Override
@@ -107,9 +107,8 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                 m_currentPackage.items.get(i).showIndicator = showIndicator;
             }
 
-            // FIXME: - Be smarter!
             SaveViewingHistoryItems();
-            m_listAdapter.notifyDataSetChanged();
+            m_listAdapter.notifyItemRangeChanged(0, m_currentPackage.items.size());
         }
 
         return super.onOptionsItemSelected(item);
@@ -117,11 +116,11 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
     private void initRecyclerView()
     {
-        RecyclerView view = findViewById(R.id.recyclerView);
-        view.addItemDecoration(new DividerItemDecoration(view.getContext(), DividerItemDecoration.VERTICAL));
+        m_listView = findViewById(R.id.recyclerView);
+        m_listView.addItemDecoration(new DividerItemDecoration(m_listView.getContext(), DividerItemDecoration.VERTICAL));
         m_listAdapter = new ListAdapter(m_currentPackage, this);
-        view.setAdapter(m_listAdapter);
-        view.setLayoutManager(new LinearLayoutManager(this));
+        m_listView.setAdapter(m_listAdapter);
+        m_listView.setLayoutManager(new LinearLayoutManager(this));
     }
 
 
@@ -139,29 +138,44 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     @Override
     public void onParsingCompleted(KijijiItemPackage pack)
     {
+        Log.d("ListingActivity: ", "Got new data");
+
+        // If we have no existing data then its all new!
         if(m_currentPackage == null)
         {
             m_currentPackage = pack;
-        }
-        else
-        {
-            BaseItemsPackage.FeedUpdateInfo updateInfo = pack.UpdateFromAnotherPackage(m_currentPackage);
-            m_currentPackage = pack;
+            ApplyViewHistoryItemContentToCurrentContent();
+            m_listAdapter.setData(m_currentPackage);
+            m_listAdapter.notifyDataSetChanged();
 
-            if(updateInfo.hasUpdates())
+            // Get the images in the background
+            for(int i = 0; i < m_currentPackage.items.size(); i++)
             {
-                DoNotification("New Items Posted!");
+                ImageParserUtilities.RetrieveImageTask imageTask = new ImageParserUtilities.RetrieveImageTask(m_currentPackage.items.get(i), this);
+                imageTask.execute(m_currentPackage.items.get(i).bitmapLink);
             }
         }
+        else // Lets determine what is new and update the list accordingly.
+        {
+            int newItemsCount = m_currentPackage.MergePackage(pack);
 
-        ApplyViewHistoryItemContentToCurrentContent();
-        m_listAdapter.setData(m_currentPackage);
-        m_listAdapter.notifyDataSetChanged();
+            if(newItemsCount > 0)
+            {
+                DoNotification(newItemsCount + " new Items Posted!");
+
+                // Note that all new items are posted at the top of the list.
+                // This is good so we can easily determine what is new from 0 to count - 1;
+
+                for(int i = 0; i < newItemsCount; i++) // Lets get the images for the new items in the background.
+                {
+                    ImageParserUtilities.RetrieveImageTask imageTask = new ImageParserUtilities.RetrieveImageTask(m_currentPackage.items.get(i), this);
+                    imageTask.execute(m_currentPackage.items.get(i).bitmapLink);
+                }
+
+                m_listAdapter.notifyItemRangeInserted(0, newItemsCount);
+            }
+        }
     }
-
-
-    // INFO: - Methods used for the class
-
 
     private void startRssParsingTimer(int delay, int period)
     {
@@ -242,5 +256,19 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     public void onLocationUpdated(Location newLocation)
     {
         m_listAdapter.updateCurrentDeviceLocation(newLocation);
+    }
+
+    @Override
+    public void onImageDownloadCompleted(BaseItem item)
+    {
+        //Find matching item and notify the list the item image has been updated.
+        int itemIndex = 0;
+        for(BaseItem currentItem: m_currentPackage.items)
+        {
+            if(currentItem.isSameItem(item))
+                m_listAdapter.notifyItemChanged(itemIndex);
+
+            itemIndex += 1;
+        }
     }
 }

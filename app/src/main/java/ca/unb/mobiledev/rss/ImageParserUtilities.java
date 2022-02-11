@@ -11,7 +11,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 interface OnTaskCompleted
 {
-    void onImageDownloadCompleted();
+    void onImageDownloadCompleted(BaseItem item);
 }
 
 public class ImageParserUtilities
@@ -56,7 +56,7 @@ public class ImageParserUtilities
         @Override
         protected void onPostExecute(Boolean aBoolean) {
             super.onPostExecute(aBoolean);
-            listener.onImageDownloadCompleted();
+            listener.onImageDownloadCompleted(this.item);
         }
     }
 }
