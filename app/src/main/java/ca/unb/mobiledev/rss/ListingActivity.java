@@ -74,13 +74,13 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.list_menu, menu);
 
-        Object obj = (Object) findViewById(R.id.menu_mark_all_as_new_button);
+      //  Object obj = (Object) findViewById(R.id.menu_mark_all_as_new_button);
 
-        MenuItem spinnerMenuItem =  menu.findItem(R.id.menu_spinner);
-        Spinner spinner = (Spinner) spinnerMenuItem.getActionView();
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
+//        MenuItem spinnerMenuItem =  menu.findItem(R.id.menu_spinner);
+//        Spinner spinner = (Spinner) spinnerMenuItem.getActionView();
+//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.planets_array, android.R.layout.simple_spinner_item);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        spinner.setAdapter(adapter);
 
 //        spinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 //            @Override
