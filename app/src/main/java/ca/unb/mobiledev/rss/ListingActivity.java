@@ -152,7 +152,6 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
             for(int i = 0; i < m_currentPackage.items.size(); i++)
             {
                 ImageParserUtilities.RetrieveImageTask imageTask = new ImageParserUtilities.RetrieveImageTask(m_currentPackage.items.get(i), this);
-                imageTask.execute(m_currentPackage.items.get(i).bitmapLink);
             }
         }
         else // Lets determine what is new and update the list accordingly.
@@ -169,7 +168,6 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                 for(int i = 0; i < newItemsCount; i++) // Lets get the images for the new items in the background.
                 {
                     ImageParserUtilities.RetrieveImageTask imageTask = new ImageParserUtilities.RetrieveImageTask(m_currentPackage.items.get(i), this);
-                    imageTask.execute(m_currentPackage.items.get(i).bitmapLink);
                 }
 
                 m_listAdapter.notifyItemRangeInserted(0, newItemsCount);

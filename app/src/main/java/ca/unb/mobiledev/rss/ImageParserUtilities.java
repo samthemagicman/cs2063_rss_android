@@ -25,6 +25,8 @@ public class ImageParserUtilities
         {
             this.listener = listener;
             this.item = item;
+
+            this.execute(item.bitmapLink);
         }
 
         @Override
