@@ -121,8 +121,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public void updateCurrentDeviceLocation(Location location)
     {
         m_currentDeviceLocation = location;
-
-        //TODO: - make this smarter and only update the requierd components and not the whole view.
+        //If location has been updated then we need to update every item in the list
         this.notifyDataSetChanged();
     }
 
