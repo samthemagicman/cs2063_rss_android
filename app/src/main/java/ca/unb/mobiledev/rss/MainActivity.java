@@ -25,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
@@ -84,6 +85,7 @@ public class MainActivity extends AppCompatActivity{
             }
         });
 
+        // This is for swiping the url list
         new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
@@ -109,6 +111,39 @@ public class MainActivity extends AppCompatActivity{
                 }).show();
             }
         }).attachToRecyclerView(m_urlRecyclerView);
+
+        // Launch Chrome so user can get more rssfeeds
+        FloatingActionButton fab = findViewById(R.id.add_url_floating_action_button);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar snackbar = Snackbar.make(m_urlRecyclerView, "Navigate to Kijiji?", Snackbar.LENGTH_LONG);
+                snackbar.setAction("YES", new View.OnClickListener(){
+                    @Override
+                    public void onClick(View view) {
+                        String urlString = "https://www.kijiji.ca";
+                        Intent showKijijiIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                        showKijijiIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        showKijijiIntent.setPackage("com.android.chrome");
+                        try {
+                            MainActivity.this.startActivity(showKijijiIntent);
+                        }
+                        catch (Exception e)
+                        {
+//                            e.printStackTrace();
+//                            Toast.makeText(MainActivity.this, "Could not launch browser", Toast.LENGTH_LONG);
+                            Uri uri = Uri.parse(urlString);
+                            // Chrome is probably not installed
+                            // OR not selected as default browser OR if no Browser is selected as default browser
+                            Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                        }
+                    }
+                });
+                snackbar.show();
+            }
+        });
     }
 
     @Override
