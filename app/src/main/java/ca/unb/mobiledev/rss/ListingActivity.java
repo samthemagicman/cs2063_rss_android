@@ -235,7 +235,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
 
-        editor.clear();
+        editor.remove("History_List_Size").commit();
         editor.putInt("History_List_Size", m_currentPackage.items.size());
 
         int i = 0;
