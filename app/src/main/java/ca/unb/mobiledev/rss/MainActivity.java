@@ -1,7 +1,9 @@
 package ca.unb.mobiledev.rss;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,6 +17,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -22,6 +25,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
@@ -59,18 +63,52 @@ public class MainActivity extends AppCompatActivity{
 
             @Override
             public void onClick(View view) {
-                ArrayList<String> rssUrlList = new ArrayList<>();
-                {
-                    //rssUrlList.add(url);
-                    UrlListAdapter adp = (UrlListAdapter) m_urlRecyclerView.getAdapter();
-                    rssUrlList.add(adp.getSelectedUrl());
-                }
 
-                Intent intent = new Intent(MainActivity.this, ListingActivity.class);
-                intent.putExtra("rssUrlList", rssUrlList);
-                startActivity(intent);
+                if(m_urlList.isEmpty())
+                {
+                    Toast.makeText(MainActivity.this, "No urls to load.", Toast.LENGTH_LONG).show();
+                }
+                else
+                {
+                    ArrayList<String> rssUrlList = new ArrayList<>();
+                    {
+                        //rssUrlList.add(url);
+                        UrlListAdapter adp = (UrlListAdapter) m_urlRecyclerView.getAdapter();
+                        rssUrlList.add(adp.getSelectedUrl());
+                    }
+
+                    Intent intent = new Intent(MainActivity.this, ListingActivity.class);
+                    intent.putExtra("rssUrlList", rssUrlList);
+                    startActivity(intent);
+                }
             }
         });
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction)
+            {
+                int pos = viewHolder.getAdapterPosition();
+                String url = m_urlList.get(pos);
+
+                m_urlList.remove(pos);
+                saveUrlList(m_urlList);
+                m_urlRecyclerView.getAdapter().notifyDataSetChanged();
+
+                Snackbar.make(m_urlRecyclerView, "Restore Deleted Item?", Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        m_urlList.add(pos, url);
+                        m_urlRecyclerView.getAdapter().notifyDataSetChanged();
+                    }
+                }).show();
+            }
+        }).attachToRecyclerView(m_urlRecyclerView);
     }
 
     @Override
