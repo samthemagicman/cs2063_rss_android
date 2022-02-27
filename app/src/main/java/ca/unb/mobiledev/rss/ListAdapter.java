@@ -89,12 +89,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
                 {
                     ShowExternalBrowser(item.link);
                 }
+                else
+                {
+                    item.showIndicator = false;
 
-                item.showIndicator = false;
-
-                notifyItemChanged(selectedIndex);
-                selectedIndex = currentPos;
-                notifyItemChanged(selectedIndex);
+                    notifyItemChanged(selectedIndex);
+                    selectedIndex = currentPos;
+                    notifyItemChanged(selectedIndex);
+                }
 
                 //TODO: - Switch text to white when selected.
             }
@@ -121,13 +123,19 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     public void updateCurrentDeviceLocation(Location location)
     {
         m_currentDeviceLocation = location;
-        //If location has been updated then we need to update every item in the list
+
+        //TODO: - maybe just updated the location distance and not the whole list
         this.notifyDataSetChanged();
     }
 
     public void setData(BaseItemsPackage data)
     {
         kijijiPackage = data;
+    }
+
+    public void updateSelectedIndexBy(int count)
+    {
+        selectedIndex += count;
     }
 
 
@@ -138,6 +146,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
         return kijijiPackage.items.size();
     }
+
 
     // Holds each TableViewCell view in memory so it can be added to the list when needed.
     public class ViewHolder extends RecyclerView.ViewHolder{
@@ -166,4 +175,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             parentLayout = itemView.findViewById(R.id.parent_layout);
         }
     }
+
+
 }

@@ -176,6 +176,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                     ImageParserUtilities.RetrieveImageTask imageTask = new ImageParserUtilities.RetrieveImageTask(m_currentPackage.items.get(i), this);
                 }
 
+                m_listAdapter.updateSelectedIndexBy(newItemsCount);
                 m_listAdapter.notifyItemRangeInserted(0, newItemsCount);
 
                 // Autoscroll to top of list if no user interaction for 5 seconds.
@@ -185,6 +186,21 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                     m_listView.scrollToPosition(0);
                 }
             }
+        }
+
+        // 40 Items max - Images will use up all the ram and crash the application
+        // TODO: - Smart loading of images. Probably wont do this ever.
+        int maxItemsInList = 40;
+        if(m_currentPackage.items.size() > maxItemsInList)
+        {
+            int count = 0;
+            for(int i = maxItemsInList - 1; i < m_currentPackage.items.size(); i++)
+            {
+                m_currentPackage.items.remove(i);
+                count += 1;
+            }
+
+            m_listAdapter.notifyItemRangeRemoved(maxItemsInList - 1, count);
         }
 
 
