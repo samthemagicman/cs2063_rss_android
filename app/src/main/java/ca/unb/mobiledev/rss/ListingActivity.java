@@ -143,7 +143,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     @Override
     public void onParsingCompleted(KijijiItemPackage pack)
     {
-        Log.d("ListingActivity: ", "Got new data");
+        Log.d("ListingActivity: ", "Got New XML for RSS Feed");
 
         // If we have no existing data then its all new!
         if(m_currentPackage == null)
@@ -165,6 +165,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
             if(newItemsCount > 0)
             {
+                Log.d("ListingActivity: ", "New Items Were Posted");
                 DoNotification(newItemsCount + " new Items Posted!");
 
                 // Note that all new items are posted at the top of the list.
@@ -176,15 +177,17 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                 }
 
                 m_listAdapter.notifyItemRangeInserted(0, newItemsCount);
+
+                // Autoscroll to top of list if no user interaction for 5 seconds.
+                long currentTime = Calendar.getInstance().getTimeInMillis();
+                if(currentTime - m_lastUserInteraction >= 5000)
+                {
+                    m_listView.scrollToPosition(0);
+                }
             }
         }
 
-        // Autoscroll to top of list if no user interaction for 5 seconds. 
-        long currentTime = Calendar.getInstance().getTimeInMillis();
-        if(currentTime - m_lastUserInteraction >= 5000)
-        {
-            m_listView.scrollToPosition(0);
-        }
+
     }
 
     private void startRssParsingTimer(int delay, int period)
