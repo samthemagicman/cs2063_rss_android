@@ -18,7 +18,10 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,6 +34,8 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     private RecyclerView m_listView;
 
     private Timer m_updateRssTimer = null;
+
+    private long m_lastUserInteraction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,6 +178,13 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                 m_listAdapter.notifyItemRangeInserted(0, newItemsCount);
             }
         }
+
+        // Autoscroll to top of list if no user interaction for 5 seconds. 
+        long currentTime = Calendar.getInstance().getTimeInMillis();
+        if(currentTime - m_lastUserInteraction >= 5000)
+        {
+            m_listView.scrollToPosition(0);
+        }
     }
 
     private void startRssParsingTimer(int delay, int period)
@@ -268,5 +280,11 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
             itemIndex += 1;
         }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        m_lastUserInteraction = Calendar.getInstance().getTimeInMillis();
     }
 }
