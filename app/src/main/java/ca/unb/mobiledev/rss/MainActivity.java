@@ -98,7 +98,7 @@ public class MainActivity extends AppCompatActivity{
     private String loadUrl()
     {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        String url = sp.getString("Saved_Kijiji_Url", "ERROR");
+        String url = sp.getString("Saved_Kijiji_Url", "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272");
 
         return url;
     }
