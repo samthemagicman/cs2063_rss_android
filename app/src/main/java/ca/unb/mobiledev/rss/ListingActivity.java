@@ -18,7 +18,10 @@ import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
+import java.sql.Time;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -31,6 +34,8 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     private RecyclerView m_listView;
 
     private Timer m_updateRssTimer = null;
+
+    private long m_lastUserInteraction;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -138,7 +143,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     @Override
     public void onParsingCompleted(KijijiItemPackage pack)
     {
-        Log.d("ListingActivity: ", "Got new data");
+        Log.d("ListingActivity: ", "Got New XML for RSS Feed");
 
         // If we have no existing data then its all new!
         if(m_currentPackage == null)
@@ -160,6 +165,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
             if(newItemsCount > 0)
             {
+                Log.d("ListingActivity: ", "New Items Were Posted");
                 DoNotification(newItemsCount + " new Items Posted!");
 
                 // Note that all new items are posted at the top of the list.
@@ -170,9 +176,34 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                     ImageParserUtilities.RetrieveImageTask imageTask = new ImageParserUtilities.RetrieveImageTask(m_currentPackage.items.get(i), this);
                 }
 
+                m_listAdapter.updateSelectedIndexBy(newItemsCount);
                 m_listAdapter.notifyItemRangeInserted(0, newItemsCount);
+
+                // Autoscroll to top of list if no user interaction for 5 seconds.
+                long currentTime = Calendar.getInstance().getTimeInMillis();
+                if(currentTime - m_lastUserInteraction >= 5000)
+                {
+                    m_listView.scrollToPosition(0);
+                }
             }
         }
+
+        // 40 Items max - Images will use up all the ram and crash the application
+        // TODO: - Smart loading of images. Probably wont do this ever.
+        int maxItemsInList = 40;
+        if(m_currentPackage.items.size() > maxItemsInList)
+        {
+            int count = 0;
+            for(int i = maxItemsInList - 1; i < m_currentPackage.items.size(); i++)
+            {
+                m_currentPackage.items.remove(i);
+                count += 1;
+            }
+
+            m_listAdapter.notifyItemRangeRemoved(maxItemsInList - 1, count);
+        }
+
+
     }
 
     private void startRssParsingTimer(int delay, int period)
@@ -235,7 +266,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
 
-        editor.clear();
+        editor.remove("History_List_Size").commit();
         editor.putInt("History_List_Size", m_currentPackage.items.size());
 
         int i = 0;
@@ -268,5 +299,11 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
             itemIndex += 1;
         }
+    }
+
+    @Override
+    public void onUserInteraction() {
+        super.onUserInteraction();
+        m_lastUserInteraction = Calendar.getInstance().getTimeInMillis();
     }
 }
