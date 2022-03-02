@@ -38,7 +38,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     RecyclerView m_urlRecyclerView;
 
@@ -122,9 +122,10 @@ public class MainActivity extends AppCompatActivity{
                     @Override
                     public void onClick(View view) {
                         String urlString = "https://www.kijiji.ca";
-                        Intent showKijijiIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-                        showKijijiIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        showKijijiIntent.setPackage("com.android.chrome");
+                        //Intent showKijijiIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
+                        Intent showKijijiIntent = new Intent(MainActivity.this, WebviewSearch.class);
+                        //showKijijiIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        //showKijijiIntent.setPackage("com.android.chrome");
                         try {
                             MainActivity.this.startActivity(showKijijiIntent);
                         }
