@@ -41,12 +41,15 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView m_urlRecyclerView;
-
     ArrayList<String> m_urlList = new ArrayList<>();
+
+    public static MainActivity currentMainActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        currentMainActivity = this;
+
         setContentView(R.layout.activity_main);
 
         m_urlList = loadUrlList();
@@ -117,34 +120,17 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar snackbar = Snackbar.make(m_urlRecyclerView, "Navigate to Kijiji?", Snackbar.LENGTH_LONG);
-                snackbar.setAction("YES", new View.OnClickListener(){
-                    @Override
-                    public void onClick(View view) {
-                        String urlString = "https://www.kijiji.ca";
-                        //Intent showKijijiIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(urlString));
-                        Intent showKijijiIntent = new Intent(MainActivity.this, WebviewSearch.class);
-                        //showKijijiIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        //showKijijiIntent.setPackage("com.android.chrome");
-                        try {
-                            MainActivity.this.startActivity(showKijijiIntent);
-                        }
-                        catch (Exception e)
-                        {
-//                            e.printStackTrace();
-//                            Toast.makeText(MainActivity.this, "Could not launch browser", Toast.LENGTH_LONG);
-                            Uri uri = Uri.parse(urlString);
-                            // Chrome is probably not installed
-                            // OR not selected as default browser OR if no Browser is selected as default browser
-                            Intent i = new Intent(Intent.ACTION_VIEW, uri);
-                            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
-                        }
-                    }
-                });
-                snackbar.show();
+                Intent showKijijiIntent = new Intent(MainActivity.this, WebviewSearch.class);
+                MainActivity.this.startActivity(showKijijiIntent);
             }
         });
+    }
+
+    public void AddToRSSList(String URL) {
+        Log.d("MainActivity", "AddToRSSList: " + URL);
+        m_urlList.add(URL);
+        saveUrlList(m_urlList);
+        m_urlRecyclerView.getAdapter().notifyDataSetChanged();
     }
 
     @Override
@@ -157,7 +143,6 @@ public class MainActivity extends AppCompatActivity {
             String newUrl = intentData.toString();
             m_urlList.add(newUrl);
             saveUrlList(m_urlList);
-
             m_urlRecyclerView.getAdapter().notifyDataSetChanged();
         }
     }

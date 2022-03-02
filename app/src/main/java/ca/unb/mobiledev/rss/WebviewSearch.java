@@ -39,10 +39,12 @@ public class WebviewSearch extends AppCompatActivity {
         Button saveButton = findViewById(R.id.save);
         saveButton.setEnabled(false);
 
+        // Save the RSS feed
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 WebviewSearch.super.onBackPressed();
+                MainActivity.currentMainActivity.AddToRSSList(currentRSSUrl);
                 Toast.makeText(WebviewSearch.this, "Saved " + currentRSSUrl, Toast.LENGTH_LONG).show();
             }
         });
@@ -105,7 +107,10 @@ public class WebviewSearch extends AppCompatActivity {
                                         currentRSSUrl = "";
                                         saveButton.setEnabled(false);
                                     } else {
-                                        currentRSSUrl = html;
+                                        // Return value returns quotes at the start and end of the string, so we get rid of them
+                                        // e.g. html = ""test""
+                                        // after - html = "test"
+                                        currentRSSUrl = html.substring(1, html.length() - 1 );
                                         saveButton.setEnabled(true);
                                     }
                                 }
