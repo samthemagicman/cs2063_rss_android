@@ -44,6 +44,8 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
         m_rssUrlList = getIntent().getStringArrayListExtra("rssUrlList");
 
+        getSupportActionBar().setTitle(getIntent().getStringExtra("rssFeedName"));
+
         m_locationLocator = new Locator(this, this);
 
         if(m_rssUrlList.isEmpty())
