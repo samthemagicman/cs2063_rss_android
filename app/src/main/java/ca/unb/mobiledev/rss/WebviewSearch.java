@@ -47,6 +47,13 @@ public class WebviewSearch extends AppCompatActivity {
             }
         });
 
+        findViewById((R.id.cancel)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                WebviewSearch.super.onBackPressed();
+            }
+        });
+
 
         mainWebview =  findViewById(R.id.webview);
         WebViewClient webViewClient = new WebViewClient();
