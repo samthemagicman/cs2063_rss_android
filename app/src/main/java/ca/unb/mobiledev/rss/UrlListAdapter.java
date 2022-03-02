@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHolder>
 {
-    ArrayList<String> m_urlList;
+    ArrayList<RSSFeedItem> m_urlList;
 
     int m_selectedIndex = -1;
 
-    public UrlListAdapter(ArrayList<String> urlList, Context context)
+    public UrlListAdapter(ArrayList<RSSFeedItem> urlList, Context context)
     {
         this.m_urlList = urlList;
     }
@@ -36,7 +36,8 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull UrlListAdapter.ViewHolder holder, int position)
     {
-        holder.urlView.setText(m_urlList.get(position));
+        final RSSFeedItem feedItem = m_urlList.get(position);
+        holder.urlView.setText(feedItem.name);
         holder.itemView.setBackgroundColor(m_selectedIndex == position ? Color.rgb(62,170,250) : Color.TRANSPARENT);
 
         //Click Listener - update selection color and launch external webpage.
@@ -68,12 +69,26 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
         return m_urlList.size();
     }
 
-    public String getSelectedUrl()
+    public RSSFeedItem getSelectedRSSFeedItem()
     {
         if(m_selectedIndex == -1) return null;
         if(m_urlList.isEmpty()) return null;
 
         return m_urlList.get(m_selectedIndex);
+    }
+    public String getSelectedFeedName()
+    {
+        if(m_selectedIndex == -1) return null;
+        if(m_urlList.isEmpty()) return null;
+
+        return m_urlList.get(m_selectedIndex).name;
+    }
+    public String getSelectedUrl()
+    {
+        if(m_selectedIndex == -1) return null;
+        if(m_urlList.isEmpty()) return null;
+
+        return m_urlList.get(m_selectedIndex).url;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder

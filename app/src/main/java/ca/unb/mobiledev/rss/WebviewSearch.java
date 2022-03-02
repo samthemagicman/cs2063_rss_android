@@ -26,6 +26,7 @@ public class WebviewSearch extends AppCompatActivity {
     final String TAG = "WebViewSearch";
     WebView mainWebview;
     String currentRSSUrl;
+    String currentSearchTerm;
 
 
 
@@ -44,7 +45,7 @@ public class WebviewSearch extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 WebviewSearch.super.onBackPressed();
-                MainActivity.currentMainActivity.AddToRSSList(currentRSSUrl);
+                MainActivity.currentMainActivity.AddToRSSList(currentRSSUrl, currentSearchTerm);
                 Toast.makeText(WebviewSearch.this, "Saved " + currentRSSUrl, Toast.LENGTH_LONG).show();
             }
         });
@@ -58,7 +59,6 @@ public class WebviewSearch extends AppCompatActivity {
 
 
         mainWebview =  findViewById(R.id.webview);
-        WebViewClient webViewClient = new WebViewClient();
         WebSettings webSettings = mainWebview.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setDomStorageEnabled(true);
@@ -111,6 +111,19 @@ public class WebviewSearch extends AppCompatActivity {
                                         // e.g. html = ""test""
                                         // after - html = "test"
                                         currentRSSUrl = html.substring(1, html.length() - 1 );
+
+                                        mainWebview.evaluateJavascript("(function() { return document.getElementById(\"SearchKeyword\").value; })();", new ValueCallback<String>() {
+                                            @Override
+                                            public void onReceiveValue(String html) {
+                                                Log.d(TAG, "onReceiveValue: Search term " + html);
+                                                if (html.equals("null") || html.equals("undefined")) {
+                                                    currentSearchTerm = "";
+                                                } else {
+                                                    currentSearchTerm = html.substring(1, html.length() - 1 );
+                                                }
+                                            }
+                                        });
+
                                         saveButton.setEnabled(true);
                                     }
                                 }

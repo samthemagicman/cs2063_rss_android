@@ -41,7 +41,7 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView m_urlRecyclerView;
-    ArrayList<String> m_urlList = new ArrayList<>();
+    ArrayList<RSSFeedItem> m_urlList = new ArrayList<>();
 
     public static MainActivity currentMainActivity;
 
@@ -74,15 +74,19 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else
                 {
+                    RSSFeedItem selectedFeedItem;
                     ArrayList<String> rssUrlList = new ArrayList<>();
                     {
                         //rssUrlList.add(url);
                         UrlListAdapter adp = (UrlListAdapter) m_urlRecyclerView.getAdapter();
-                        rssUrlList.add(adp.getSelectedUrl());
+
+                        selectedFeedItem = adp.getSelectedRSSFeedItem();
+                        rssUrlList.add(selectedFeedItem.url);
                     }
 
                     Intent intent = new Intent(MainActivity.this, ListingActivity.class);
                     intent.putExtra("rssUrlList", rssUrlList);
+                    intent.putExtra("rssFeedName", selectedFeedItem.name);
                     startActivity(intent);
                 }
             }
@@ -99,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction)
             {
                 int pos = viewHolder.getAdapterPosition();
-                String url = m_urlList.get(pos);
+                RSSFeedItem url = m_urlList.get(pos);
 
                 m_urlList.remove(pos);
                 saveUrlList(m_urlList);
@@ -126,26 +130,29 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public void AddToRSSList(String URL) {
+    public void AddToRSSList(String URL, String name) {
         Log.d("MainActivity", "AddToRSSList: " + URL);
-        m_urlList.add(URL);
+        RSSFeedItem newItem = new RSSFeedItem();
+        newItem.name = name;
+        newItem.url = URL;
+        m_urlList.add(newItem);
         saveUrlList(m_urlList);
         m_urlRecyclerView.getAdapter().notifyDataSetChanged();
     }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-
-        Uri intentData = intent.getData();
-        if(intentData != null)
-        {
-            String newUrl = intentData.toString();
-            m_urlList.add(newUrl);
-            saveUrlList(m_urlList);
-            m_urlRecyclerView.getAdapter().notifyDataSetChanged();
-        }
-    }
+//
+//    @Override
+//    protected void onNewIntent(Intent intent) {
+//        super.onNewIntent(intent);
+//
+//        Uri intentData = intent.getData();
+//        if(intentData != null)
+//        {
+//            String newUrl = intentData.toString();
+//            m_urlList.add(newUrl);
+//            saveUrlList(m_urlList);
+//            m_urlRecyclerView.getAdapter().notifyDataSetChanged();
+//        }
+//    }
 
     @Override
     protected void onStart() {
@@ -153,7 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void saveUrlList(ArrayList<String> urlList)
+    private void saveUrlList(ArrayList<RSSFeedItem> urlList)
     {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor editor = sp.edit();
@@ -169,30 +176,41 @@ public class MainActivity extends AppCompatActivity {
 
         editor.putInt("url_list_size", urlList.size()).commit();
         int count = 0;
-        for(String item: urlList)
+        for(RSSFeedItem item: urlList)
         {
-            editor.putString("url_list_item_" + count++, item).commit();
+            editor.putString("url_list_item_" + count, item.url).commit();
+            editor.putString("url_list_item_name_" + count, item.name).commit();
+            count++;
         }
     }
 
-    private ArrayList<String> loadUrlList()
+    private ArrayList<RSSFeedItem> loadUrlList()
     {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 
-        ArrayList<String> newUrlList = new ArrayList<>();
+        ArrayList<RSSFeedItem> newUrlList = new ArrayList<>();
 
         // Read and add the items to the list.
         int listCount = sp.getInt("url_list_size", 0);
         for(int i = 0; i < listCount; i++)
         {
             String url2 = sp.getString("url_list_item_" + i, "ERROR");
-            if(url2 != "ERROR")
-                newUrlList.add(url2);
+            String name = sp.getString("url_list_item_name_" + i, "ERROR");
+            if(url2 != "ERROR" && name != "ERROR") {
+                RSSFeedItem newItem = new RSSFeedItem();
+                newItem.url = url2;
+                newItem.name = name;
+                newUrlList.add(newItem);
+            }
         }
 
         // Give a fake one for fun!
-        if(newUrlList.isEmpty())
-            newUrlList.add("https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272");
+        if(newUrlList.isEmpty()) {
+            RSSFeedItem newItem = new RSSFeedItem();
+            newItem.url = "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272";
+            newItem.name = "Tools";
+            newUrlList.add(newItem);
+        }
 
         return newUrlList;
     }
