@@ -75,6 +75,18 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         SaveViewingHistoryItems();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        m_currentPackage = null;
+    }
+
+    //    @Override
+//    protected void onPause() {
+//        super.onPause();
+//        onStop();
+//    }
+
     // INFO: - The following overrides are for the option menu in the toolbar.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -294,12 +306,15 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     {
         //Find matching item and notify the list the item image has been updated.
         int itemIndex = 0;
-        for(BaseItem currentItem: m_currentPackage.items)
+        if(m_currentPackage != null)
         {
-            if(currentItem.isSameItem(item))
-                m_listAdapter.notifyItemChanged(itemIndex);
+            for(BaseItem currentItem: m_currentPackage.items)
+            {
+                if(currentItem.isSameItem(item))
+                    m_listAdapter.notifyItemChanged(itemIndex);
 
-            itemIndex += 1;
+                itemIndex += 1;
+            }
         }
     }
 
