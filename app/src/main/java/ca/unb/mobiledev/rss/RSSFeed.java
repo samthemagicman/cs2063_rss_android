@@ -15,7 +15,7 @@ public class RSSFeed implements Serializable {
     static String TAG = "RSSFeed";
     public String name;
     public String url;
-    public int lastCheckedTick;
+    public int latestItemTime;
 
     public String getName() {
         return name;
@@ -30,7 +30,7 @@ public class RSSFeed implements Serializable {
         return "RSSFeed{" +
                 "name='" + name + '\'' +
                 ", url='" + url + '\'' +
-                ", lastCheckedTick=" + lastCheckedTick +
+                ", latestItemTime=" + latestItemTime +
                 '}';
     }
 }
