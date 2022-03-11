@@ -15,11 +15,11 @@ import java.util.ArrayList;
 
 public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHolder>
 {
-    ArrayList<RSSFeedItem> m_urlList;
+    ArrayList<RSSFeed> m_urlList;
 
     int m_selectedIndex = -1;
 
-    public UrlListAdapter(ArrayList<RSSFeedItem> urlList, Context context)
+    public UrlListAdapter(ArrayList<RSSFeed> urlList, Context context)
     {
         this.m_urlList = urlList;
     }
@@ -36,7 +36,7 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
     @Override
     public void onBindViewHolder(@NonNull UrlListAdapter.ViewHolder holder, int position)
     {
-        final RSSFeedItem feedItem = m_urlList.get(position);
+        final RSSFeed feedItem = m_urlList.get(position);
         holder.urlView.setText(feedItem.name);
         holder.itemView.setBackgroundColor(m_selectedIndex == position ? Color.rgb(62,170,250) : Color.TRANSPARENT);
 
@@ -69,7 +69,7 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
         return m_urlList.size();
     }
 
-    public RSSFeedItem getSelectedRSSFeedItem()
+    public RSSFeed getSelectedRSSFeedItem()
     {
         if(m_selectedIndex == -1) return null;
         if(m_urlList.isEmpty()) return null;

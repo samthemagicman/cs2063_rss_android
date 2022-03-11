@@ -8,40 +8,25 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
-import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG = "MainActivity";
     RecyclerView m_urlRecyclerView;
-    ArrayList<RSSFeedItem> m_urlList = new ArrayList<>();
+    ArrayList<RSSFeed> m_urlList = new ArrayList<>();
+
+    RSSFeedManager rssFeeds;
 
     public static MainActivity currentMainActivity;
 
@@ -50,9 +35,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         currentMainActivity = this;
 
-        setContentView(R.layout.activity_main);
+        rssFeeds = new RSSFeedManager(this);
+        rssFeeds.readFeedsFromFile();
 
-        m_urlList = loadUrlList();
+        setContentView(R.layout.activity_main);
+        m_urlList = rssFeeds.getRSSFeeds();
+
+        if (m_urlList.isEmpty()) {
+            RSSFeed newItem = new RSSFeed();
+            newItem.url = "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272";
+            newItem.name = "Tools";
+            rssFeeds.addFeed(newItem);
+
+            m_urlList = rssFeeds.getRSSFeeds();
+        }
 
         m_urlRecyclerView = findViewById(R.id.rss_url_list_recycler_view);
 
@@ -61,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         m_urlRecyclerView.setAdapter(urlListAdapter);
         m_urlRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        // When the "View RSS Feed" button is pressed
         Button btn = findViewById(R.id.request_button);
         btn.setOnClickListener(new View.OnClickListener()
         {
@@ -74,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 else
                 {
-                    RSSFeedItem selectedFeedItem;
+                    RSSFeed selectedFeedItem;
                     ArrayList<String> rssUrlList = new ArrayList<>();
                     {
                         //rssUrlList.add(url);
@@ -103,10 +100,14 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction)
             {
                 int pos = viewHolder.getAdapterPosition();
-                RSSFeedItem url = m_urlList.get(pos);
+                RSSFeed url = m_urlList.get(pos);
 
-                m_urlList.remove(pos);
-                saveUrlList(m_urlList);
+                rssFeeds.removeFeed(url);
+
+                m_urlList = rssFeeds.getRSSFeeds();
+
+                rssFeeds.saveFeedsToFile();
+
                 m_urlRecyclerView.getAdapter().notifyDataSetChanged();
 
                 Snackbar.make(m_urlRecyclerView, "Restore Deleted Item?", Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
@@ -132,11 +133,15 @@ public class MainActivity extends AppCompatActivity {
 
     public void AddToRSSList(String URL, String name) {
         Log.d("MainActivity", "AddToRSSList: " + URL);
-        RSSFeedItem newItem = new RSSFeedItem();
+        RSSFeed newItem = new RSSFeed();
         newItem.name = name;
         newItem.url = URL;
-        m_urlList.add(newItem);
-        saveUrlList(m_urlList);
+        rssFeeds.addFeed(newItem); // Adds to RSS feed list
+
+        m_urlList = rssFeeds.getRSSFeeds(); // Just reads cached data
+
+        rssFeeds.saveFeedsToFile(); // Save to file
+
         m_urlRecyclerView.getAdapter().notifyDataSetChanged();
     }
 //
@@ -159,61 +164,5 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
     }
-
-    private void saveUrlList(ArrayList<RSSFeedItem> urlList)
-    {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sp.edit();
-
-        // Remove the old items
-        int oldListCount = sp.getInt("url_list_size", 0);
-        for(int i = 0; i < oldListCount; i++)
-        {
-            editor.remove("url_list_item_" + i).commit();
-        }
-
-        // Save the items
-
-        editor.putInt("url_list_size", urlList.size()).commit();
-        int count = 0;
-        for(RSSFeedItem item: urlList)
-        {
-            editor.putString("url_list_item_" + count, item.url).commit();
-            editor.putString("url_list_item_name_" + count, item.name).commit();
-            count++;
-        }
-    }
-
-    private ArrayList<RSSFeedItem> loadUrlList()
-    {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-
-        ArrayList<RSSFeedItem> newUrlList = new ArrayList<>();
-
-        // Read and add the items to the list.
-        int listCount = sp.getInt("url_list_size", 0);
-        for(int i = 0; i < listCount; i++)
-        {
-            String url2 = sp.getString("url_list_item_" + i, "ERROR");
-            String name = sp.getString("url_list_item_name_" + i, "ERROR");
-            if(url2 != "ERROR" && name != "ERROR") {
-                RSSFeedItem newItem = new RSSFeedItem();
-                newItem.url = url2;
-                newItem.name = name;
-                newUrlList.add(newItem);
-            }
-        }
-
-        // Give a fake one for fun!
-        if(newUrlList.isEmpty()) {
-            RSSFeedItem newItem = new RSSFeedItem();
-            newItem.url = "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272";
-            newItem.name = "Tools";
-            newUrlList.add(newItem);
-        }
-
-        return newUrlList;
-    }
-
 
 }
