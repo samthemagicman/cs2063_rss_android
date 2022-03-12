@@ -28,20 +28,32 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    RecyclerView m_urlRecyclerView;
-    ArrayList<RSSFeed> m_urlList = new ArrayList<>();
 
-    RSSFeedManager rssFeeds;
+    RecyclerView m_urlRecyclerView;
+    UrlListAdapter m_urlListAdapter;
+
+    ArrayList<RSSFeed> m_rssFeedList = new ArrayList<>();
+
+   public RSSFeedManager rssFeedManager;
 
     public static MainActivity currentMainActivity;
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        m_rssFeedList = rssFeedManager.getRssFeedList(true);
+        m_urlListAdapter.updateList(m_rssFeedList);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         currentMainActivity = this;
 
-        rssFeeds = new RSSFeedManager(this);
-        rssFeeds.readFeedsFromFile();
+        rssFeedManager = new RSSFeedManager(this);
+        m_rssFeedList = rssFeedManager.getRssFeedList(false);
 
 
         //region Job Scheduler starting
@@ -66,22 +78,22 @@ public class MainActivity extends AppCompatActivity {
         //endregion
 
         setContentView(R.layout.activity_main);
-        m_urlList = rssFeeds.getRSSFeeds();
 
-        if (m_urlList.isEmpty()) {
-            RSSFeed newItem = new RSSFeed();
-            newItem.url = "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272";
-            newItem.name = "Tools";
-            rssFeeds.addFeed(newItem);
 
-            m_urlList = rssFeeds.getRSSFeeds();
+        if (m_rssFeedList == null || m_rssFeedList.isEmpty()) {
+            RSSFeed newItem = new RSSFeed("Tools",
+                    "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272",
+                    new ArrayList<String>());
+            rssFeedManager.addFeed(newItem);
+
+            m_rssFeedList = rssFeedManager.getRssFeedList(false);
         }
 
         m_urlRecyclerView = findViewById(R.id.rss_url_list_recycler_view);
 
-        UrlListAdapter urlListAdapter = new UrlListAdapter(m_urlList, this);
+        m_urlListAdapter = new UrlListAdapter(m_rssFeedList, this);
         m_urlRecyclerView.addItemDecoration(new DividerItemDecoration(m_urlRecyclerView.getContext(), DividerItemDecoration.VERTICAL));
-        m_urlRecyclerView.setAdapter(urlListAdapter);
+        m_urlRecyclerView.setAdapter(m_urlListAdapter);
         m_urlRecyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         // When the "View RSS Feed" button is pressed
@@ -92,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                if(m_urlList.isEmpty())
+                if(m_rssFeedList.isEmpty())
                 {
                     Toast.makeText(MainActivity.this, "No urls to load.", Toast.LENGTH_LONG).show();
                 }
@@ -109,15 +121,15 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     Intent intent = new Intent(MainActivity.this, ListingActivity.class);
-                    intent.putExtra("rssUrlList", rssUrlList);
-                    intent.putExtra("rssFeedName", selectedFeedItem.name);
+                    intent.putExtra("selectedRssFeed", selectedFeedItem);
                     startActivity(intent);
                 }
             }
         });
 
+
         // This is for swiping the url list
-        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
             @Override
             public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
                 return false;
@@ -127,21 +139,20 @@ public class MainActivity extends AppCompatActivity {
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction)
             {
                 int pos = viewHolder.getAdapterPosition();
-                RSSFeed url = m_urlList.get(pos);
+                RSSFeed url = m_rssFeedList.get(pos);
 
-                rssFeeds.removeFeed(url);
-
-                m_urlList = rssFeeds.getRSSFeeds();
-
-                rssFeeds.saveFeedsToFile();
-
-                m_urlRecyclerView.getAdapter().notifyDataSetChanged();
+                rssFeedManager.removeFeed(url);
+                rssFeedManager.saveFeedsToFile();
+                m_rssFeedList = rssFeedManager.getRssFeedList(true);
+                m_urlListAdapter.updateList(m_rssFeedList);
 
                 Snackbar.make(m_urlRecyclerView, "Restore Deleted Item?", Snackbar.LENGTH_LONG).setAction("Undo", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        m_urlList.add(pos, url);
-                        m_urlRecyclerView.getAdapter().notifyDataSetChanged();
+                        m_rssFeedList.add(pos, url);
+                        rssFeedManager.saveFeedsToFile();
+                        m_rssFeedList = rssFeedManager.getRssFeedList(true);
+                        m_urlListAdapter.updateList(m_rssFeedList);
                     }
                 }).show();
             }
@@ -160,31 +171,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void AddToRSSList(String URL, String name) {
         Log.d("MainActivity", "AddToRSSList: " + URL);
-        RSSFeed newItem = new RSSFeed();
-        newItem.name = name;
-        newItem.url = URL;
-        rssFeeds.addFeed(newItem); // Adds to RSS feed list
+        RSSFeed newItem = new RSSFeed(name, URL, new ArrayList<String>());
 
-        m_urlList = rssFeeds.getRSSFeeds(); // Just reads cached data
+        rssFeedManager.addFeed(newItem); // Adds to RSS feed list
+        rssFeedManager.saveFeedsToFile(); // Save to file
 
-        rssFeeds.saveFeedsToFile(); // Save to file
-
-        m_urlRecyclerView.getAdapter().notifyDataSetChanged();
+        m_rssFeedList = rssFeedManager.getRssFeedList(false);
+        m_urlListAdapter.updateList(m_rssFeedList);
     }
-//
-//    @Override
-//    protected void onNewIntent(Intent intent) {
-//        super.onNewIntent(intent);
-//
-//        Uri intentData = intent.getData();
-//        if(intentData != null)
-//        {
-//            String newUrl = intentData.toString();
-//            m_urlList.add(newUrl);
-//            saveUrlList(m_urlList);
-//            m_urlRecyclerView.getAdapter().notifyDataSetChanged();
-//        }
-//    }
 
     @Override
     protected void onStart() {
