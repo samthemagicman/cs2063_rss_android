@@ -6,29 +6,22 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.SharedPreferences;
 import android.location.Location;
-import android.media.Image;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
 
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class ListingActivity extends AppCompatActivity implements ParsingListener, LocatorListener, OnTaskCompleted {
 
     private ListAdapter m_listAdapter;
-    private ArrayList<String> m_rssUrlList;
+    private RSSFeed m_selectedRssFeed;
     private BaseItemsPackage m_currentPackage;
     private Locator m_locationLocator;
     private RecyclerView m_listView;
@@ -42,18 +35,11 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_listing);
 
-        m_rssUrlList = getIntent().getStringArrayListExtra("rssUrlList");
+        m_selectedRssFeed = (RSSFeed) getIntent().getSerializableExtra("selectedRssFeed");
 
         getSupportActionBar().setTitle(getIntent().getStringExtra("rssFeedName"));
 
         m_locationLocator = new Locator(this, this);
-
-        if(m_rssUrlList.isEmpty())
-        {
-            //TODO: - Display Message
-            Log.d("ERROR", "No rss urls in list,");
-            return;
-        }
 
         initRecyclerView();
     }
@@ -69,23 +55,26 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
     @Override
     protected void onStop() {
-        super.onStop();
         stopRssParsingTimer();
         m_locationLocator.stopLocationServiceLoop();
-        SaveViewingHistoryItems();
+        SaveViewingHistory();
+        super.onStop();
     }
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
+
+        SaveViewingHistory();
         m_currentPackage = null;
+        super.onDestroy();
     }
 
-    //    @Override
-//    protected void onPause() {
-//        super.onPause();
-//        onStop();
-//    }
+        @Override
+    protected void onPause() {
+        SaveViewingHistory();
+        super.onPause();
+        onStop();
+    }
 
     // INFO: - The following overrides are for the option menu in the toolbar.
     @Override
@@ -126,7 +115,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
                 m_currentPackage.items.get(i).showIndicator = showIndicator;
             }
 
-            SaveViewingHistoryItems();
+            SaveViewingHistory();
             m_listAdapter.notifyItemRangeChanged(0, m_currentPackage.items.size());
         }
 
@@ -163,7 +152,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         if(m_currentPackage == null)
         {
             m_currentPackage = pack;
-            ApplyViewHistoryItemContentToCurrentContent();
+            LoadViewingHistory();
             m_listAdapter.setData(m_currentPackage);
             m_listAdapter.notifyDataSetChanged();
 
@@ -226,7 +215,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         m_updateRssTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                ParseTheRssDataFromUrl(m_rssUrlList.get(0));
+                ParseTheRssDataFromUrl(m_selectedRssFeed.url);
             }
         }, delay, period);
     }
@@ -246,28 +235,19 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
 
     // Loads the last saved history and try to find out which items have already been viewed.
-    private void ApplyViewHistoryItemContentToCurrentContent()
+    private void LoadViewingHistory()
     {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        int size = sp.getInt("History_List_Size", 0);
+        ArrayList<String> viewedLinks = m_selectedRssFeed.viewedItems;
+        if(viewedLinks.size() == 0) return;
 
-        if(size != 0)
+        for(BaseItem item: m_currentPackage.items)
         {
-            ArrayList<String> viewedLinks = new ArrayList<>();
-            for(int i = 0; i < size; i++)
+            for(String viewedLink: viewedLinks)
             {
-                viewedLinks.add(sp.getString("Item_" + i, null));
-            }
-
-            for(BaseItem item: m_currentPackage.items)
-            {
-                for(String viewedLink: viewedLinks)
+                if(item.link.equals(viewedLink))
                 {
-                    if(item.link.equals(viewedLink))
-                    {
-                        item.showIndicator = false; //User has already seen this item.
-                        break;
-                    }
+                    item.showIndicator = false; //User has already seen this item.
+                    break;
                 }
             }
         }
@@ -275,24 +255,23 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
 
     // Saves the current viewing history - ie user has already viewed
     // This saves the item.link and compares it on loading.
-    private boolean SaveViewingHistoryItems()
+    private void SaveViewingHistory()
     {
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = sp.edit();
-
-        editor.remove("History_List_Size").commit();
-        editor.putInt("History_List_Size", m_currentPackage.items.size());
+        ArrayList<String> viewedLinks = m_selectedRssFeed.viewedItems;
+        viewedLinks.clear();
 
         int i = 0;
         for(BaseItem item: m_currentPackage.items)
         {
             if(item.showIndicator == false) // User has already seen this item;
             {
-                editor.putString("Item_" + i++, item.link);
+                viewedLinks.add(item.link);
             }
         }
 
-        return editor.commit();
+        RSSFeedManager manager = new RSSFeedManager(this);
+        //manager.getRssFeedList();
+        manager.saveFeedToFile(m_selectedRssFeed);
     }
 
     @Override

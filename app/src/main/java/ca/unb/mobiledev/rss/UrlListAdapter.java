@@ -24,6 +24,12 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
         this.m_urlList = urlList;
     }
 
+    public void updateList(ArrayList<RSSFeed> list)
+    {
+        m_urlList = list;
+        notifyDataSetChanged();
+    }
+
 
     @NonNull
     @Override

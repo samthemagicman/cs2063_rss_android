@@ -16,6 +16,14 @@ public class RSSFeed implements Serializable {
     public String name;
     public String url;
     public int lastCheckedTick;
+    public ArrayList<String> viewedItems = new ArrayList<>();
+
+    public RSSFeed(String name, String url, ArrayList<String> viewedItemsList)
+    {
+        this.name = name;
+        this.url = url;
+        this.viewedItems = viewedItems;
+    }
 
     public String getName() {
         return name;
@@ -26,11 +34,14 @@ public class RSSFeed implements Serializable {
     }
 
     @Override
-    public String toString() {
+    public String toString()
+    {
+
         return "RSSFeed{" +
                 "name='" + name + '\'' +
                 ", url='" + url + '\'' +
                 ", lastCheckedTick=" + lastCheckedTick +
+                ", viewedItems=" + viewedItems.toString() +
                 '}';
     }
 }
