@@ -41,8 +41,14 @@ public class RSSFeedManager {
                 Log.d(TAG, "ReadSavedFeeds: File not found");
                 m_rssFeedList = new ArrayList<RSSFeed>();
             } catch (Exception e) {
+                /*
+                There's an error that can happen if we update the RSSFeed class
+                where the function tries to use oos.readObject and spits out an error
+                because the classes are no longer the same
+                 */
                 Log.d(TAG, "ReadSavedFeeds: Error reading feed");
                 e.printStackTrace();
+                m_rssFeedList = new ArrayList<RSSFeed>();
             }
     }
 

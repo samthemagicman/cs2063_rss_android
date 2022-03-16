@@ -15,7 +15,7 @@ public class RSSFeed implements Serializable {
     static String TAG = "RSSFeed";
     public String name;
     public String url;
-    public int lastCheckedTick;
+    public long lastCheckedTick;
     public ArrayList<String> viewedItems = new ArrayList<>();
 
     public RSSFeed(String name, String url, ArrayList<String> viewedItemsList)
