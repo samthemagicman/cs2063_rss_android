@@ -42,6 +42,7 @@ public class RSSFeedManager {
                 m_rssFeedList = new ArrayList<RSSFeed>();
             } catch (Exception e) {
                 Log.d(TAG, "ReadSavedFeeds: Error reading feed");
+                RSSFeedCache = new ArrayList<RSSFeed>();
                 e.printStackTrace();
             }
     }
