@@ -80,7 +80,7 @@ public class CheckRSSFeeds extends JobService implements Response.ErrorListener 
                         Log.d(TAG, "onParsingCompleted: Notifying user of new items in feed");
 
                         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "1")
-                                .setSmallIcon(R.drawable.common_full_open_on_phone)
+                                .setSmallIcon(R.drawable.ic_icon)
                                 .setContentTitle(feed.name)
                                 .setContentText("New Items in " + feed.getName())
                                 .setPriority(NotificationCompat.PRIORITY_DEFAULT)
