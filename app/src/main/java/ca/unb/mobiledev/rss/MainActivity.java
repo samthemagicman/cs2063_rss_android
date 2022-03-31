@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -51,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         m_rssFeedList = rssFeedManager.getRssFeedList(false);
 
         setContentView(R.layout.activity_main);
-
 
         if (m_rssFeedList == null || m_rssFeedList.isEmpty()) {
             RSSFeed newItem = new RSSFeed("Tools",
@@ -140,6 +140,8 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(showKijijiIntent);
             }
         });
+
+        getSupportActionBar().setTitle("RSS Feed Reader");
     }
 
     public void AddToRSSList(String URL, String name) {
