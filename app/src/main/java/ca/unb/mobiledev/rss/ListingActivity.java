@@ -36,9 +36,8 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         setContentView(R.layout.activity_listing);
 
         m_selectedRssFeed = (RSSFeed) getIntent().getSerializableExtra("selectedRssFeed");
-
-        getSupportActionBar().setTitle(getIntent().getStringExtra("rssFeedName"));
-
+        getSupportActionBar().setTitle(m_selectedRssFeed.name);
+        
         m_locationLocator = new Locator(this, this);
 
         initRecyclerView();
