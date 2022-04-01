@@ -145,8 +145,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void AddToRSSList(String URL, String name) {
+
+        String upperString = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         Log.d("MainActivity", "AddToRSSList: " + URL);
-        RSSFeed newItem = new RSSFeed(name, URL, new ArrayList<String>());
+        RSSFeed newItem = new RSSFeed(upperString, URL, new ArrayList<String>());
 
         rssFeedManager.addFeed(newItem); // Adds to RSS feed list
         rssFeedManager.saveFeedsToFile(); // Save to file
