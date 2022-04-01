@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
@@ -36,8 +37,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         setContentView(R.layout.activity_listing);
 
         m_selectedRssFeed = (RSSFeed) getIntent().getSerializableExtra("selectedRssFeed");
-
-        getSupportActionBar().setTitle(getIntent().getStringExtra("rssFeedName"));
+        getSupportActionBar().setTitle(m_selectedRssFeed.name);
 
         m_locationLocator = new Locator(this, this);
 
@@ -129,6 +129,7 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         m_listAdapter = new ListAdapter(m_currentPackage, this);
         m_listView.setAdapter(m_listAdapter);
         m_listView.setLayoutManager(new LinearLayoutManager(this));
+        m_listView.setBackgroundColor(Color.WHITE);
     }
 
 

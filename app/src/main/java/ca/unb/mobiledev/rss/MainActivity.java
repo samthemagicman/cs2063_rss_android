@@ -7,7 +7,9 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -52,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-
         if (m_rssFeedList == null || m_rssFeedList.isEmpty()) {
             RSSFeed newItem = new RSSFeed("Tools",
                     "https://www.kijiji.ca/rss-srp-tool/gta-greater-toronto-area/tools/k0c110l1700272",
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         m_urlRecyclerView = findViewById(R.id.rss_url_list_recycler_view);
+        m_urlRecyclerView.setBackgroundColor(Color.WHITE);
 
         m_urlListAdapter = new UrlListAdapter(m_rssFeedList, this);
         m_urlRecyclerView.addItemDecoration(new DividerItemDecoration(m_urlRecyclerView.getContext(), DividerItemDecoration.VERTICAL));
@@ -140,11 +142,15 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.startActivity(showKijijiIntent);
             }
         });
+
+        getSupportActionBar().setTitle("RSS Feed Reader");
     }
 
     public void AddToRSSList(String URL, String name) {
+
+        String upperString = name.substring(0, 1).toUpperCase() + name.substring(1).toLowerCase();
         Log.d("MainActivity", "AddToRSSList: " + URL);
-        RSSFeed newItem = new RSSFeed(name, URL, new ArrayList<String>());
+        RSSFeed newItem = new RSSFeed(upperString, URL, new ArrayList<String>());
 
         rssFeedManager.addFeed(newItem); // Adds to RSS feed list
         rssFeedManager.saveFeedsToFile(); // Save to file

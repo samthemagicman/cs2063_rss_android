@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Date;
@@ -41,7 +42,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         // Color Selected Item
-        holder.itemView.setBackgroundColor(selectedIndex == position ? Color.rgb(62,170,250) : Color.TRANSPARENT);
+        holder.itemView.setBackgroundColor(selectedIndex == position ? ResourcesCompat.getColor(m_context.getResources(), R.color.mm_selected_blue,null) : Color.TRANSPARENT);
+
 
         int currentPos = position;
 
@@ -64,8 +66,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         itemLocation.setLatitude(item.lat);
         itemLocation.setLongitude(item.lon);
         Location deviceLocation = m_currentDeviceLocation;
-        double dist = (deviceLocation != null) ? deviceLocation.distanceTo(itemLocation) / 1000 : 0.0 ;//dist in km
-        String distToPrint = "Dist: " + String.format("%.2f", dist) + "km";
+        double dist = (deviceLocation != null) ? (int) deviceLocation.distanceTo(itemLocation) / 1000 : 0.0 ;//dist in km
+        String distToPrint = "Dist: " + String.format("%.0f", dist) + "km";
 
         // Set our items to display the content
             holder.titleView.setText(item.title);
