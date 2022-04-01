@@ -1,5 +1,6 @@
 package ca.unb.mobiledev.rss;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -9,6 +10,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
@@ -18,10 +20,12 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
     ArrayList<RSSFeed> m_urlList;
 
     int m_selectedIndex = -1;
+    Context context;
 
     public UrlListAdapter(ArrayList<RSSFeed> urlList, Context context)
     {
         this.m_urlList = urlList;
+        this.context = context;
     }
 
     public void updateList(ArrayList<RSSFeed> list)
@@ -40,11 +44,11 @@ public class UrlListAdapter extends RecyclerView.Adapter<UrlListAdapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(@NonNull UrlListAdapter.ViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull UrlListAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position)
     {
         final RSSFeed feedItem = m_urlList.get(position);
         holder.urlView.setText(feedItem.name);
-        holder.itemView.setBackgroundColor(m_selectedIndex == position ? Color.rgb(62,170,250) : Color.TRANSPARENT);
+        holder.itemView.setBackgroundColor(m_selectedIndex == position ? ResourcesCompat.getColor(context.getResources(), R.color.mm_selected_blue,null) : Color.TRANSPARENT);
 
         //Click Listener - update selection color and launch external webpage.
         holder.parentLayout.setOnClickListener(new View.OnClickListener()

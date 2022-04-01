@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.ActionBar;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         m_urlRecyclerView = findViewById(R.id.rss_url_list_recycler_view);
+        m_urlRecyclerView.setBackgroundColor(Color.WHITE);
 
         m_urlListAdapter = new UrlListAdapter(m_rssFeedList, this);
         m_urlRecyclerView.addItemDecoration(new DividerItemDecoration(m_urlRecyclerView.getContext(), DividerItemDecoration.VERTICAL));
