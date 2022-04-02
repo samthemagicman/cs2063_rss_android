@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if(m_rssFeedList.isEmpty())
                 {
-                    Toast.makeText(MainActivity.this, "No urls to load.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(MainActivity.this, "Please add an item to the list.", Toast.LENGTH_LONG).show();
                 }
                 else
                 {
