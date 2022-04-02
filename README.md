@@ -6,8 +6,9 @@ A RSS feed reader for selecting, storing and reading individual feeds. The curre
 
 ![Screen Shot 2022-04-02 at 2 42 51 PM](https://user-images.githubusercontent.com/93284303/161394853-d3b56d7c-a563-4c37-98f8-3e092bf87111.png)
 
+
+
 - Feed Items List 
-- 
 <img width="487" alt="Screen Shot 2022-03-31 at 11 02 17 PM" src="https://user-images.githubusercontent.com/93284303/161394809-88ec5716-1926-40f8-91ef-01d6f3ac49ac.png">
 
 # Features 
