@@ -6,6 +6,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
@@ -13,6 +15,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,9 +42,9 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         m_selectedRssFeed = (RSSFeed) getIntent().getSerializableExtra("selectedRssFeed");
         getSupportActionBar().setTitle(m_selectedRssFeed.name);
 
-        m_locationLocator = new Locator(this, this);
-
         initRecyclerView();
+
+        m_locationLocator = new Locator(this, this);
     }
 
     @Override
@@ -258,6 +261,9 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
     // This saves the item.link and compares it on loading.
     private void SaveViewingHistory()
     {
+        if(m_selectedRssFeed == null || m_currentPackage == null) return;
+        if(m_currentPackage.items == null) return;
+
         ArrayList<String> viewedLinks = m_selectedRssFeed.viewedItems;
         viewedLinks.clear();
 
@@ -273,6 +279,33 @@ public class ListingActivity extends AppCompatActivity implements ParsingListene
         RSSFeedManager manager = new RSSFeedManager(this);
         //manager.getRssFeedList();
         manager.saveFeedToFile(m_selectedRssFeed);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            switch (requestCode) {
+                default:
+                    // If request is cancelled, the result arrays are empty.
+                    if (grantResults.length > 0 &&
+                            grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                    {
+                        // Permission is granted. Continue the action or workflow
+                        // in your app.
+                        m_locationLocator.startLocationServiceLoop(10000, 500);
+
+                    }  else {
+                        // Explain to the user that the feature is unavailable because
+                        // the features requires a permission that the user has denied.
+                        // At the same time, respect the user's decision. Don't link to
+                        // system settings in an effort to convince the user to change
+                        // their decision.
+                        Toast.makeText(getApplicationContext(), "Cannot get location - permission denied.", Toast.LENGTH_SHORT);
+                    }
+                    return;
+            }
+        // Other 'case' lines to check for other
+        // permissions this app might request.
     }
 
     @Override

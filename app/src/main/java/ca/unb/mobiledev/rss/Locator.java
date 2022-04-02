@@ -15,14 +15,13 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
-interface LocatorListener
-{
+interface LocatorListener {
     void onLocationUpdated(Location newLocation);
 }
 
 /*This class is a helper class for using the location services.
-* We use this to get the current location so we can compute
-* the distance to the item*/
+ * We use this to get the current location so we can compute
+ * the distance to the item*/
 public class Locator implements LocationListener {
 
     private LocationManager m_locationManager;
@@ -36,39 +35,43 @@ public class Locator implements LocationListener {
         m_locationManager = (LocationManager) context.getSystemService(context.LOCATION_SERVICE);
 
         if (!hasPermissions()) {
-            ActivityCompat.requestPermissions((Activity) context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
+            requestPermissions();
         }
     }
 
-    public void startLocationServiceLoop(long updateTimeMS, long updateDistanceMeters)
-    {
+    public void startLocationServiceLoop(long updateTimeMS, long updateDistanceMeters) {
         if (m_locationManager == null) return;
 
-            if (ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-            {
-                m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, updateTimeMS, updateDistanceMeters, this);
-            }
+        if (ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            m_locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, updateTimeMS, updateDistanceMeters, this);
+        }
     }
 
-    public void stopLocationServiceLoop()
-    {
+    public void stopLocationServiceLoop() {
         m_locationManager.removeUpdates(this);
     }
 
-    private boolean hasPermissions()
-    {
+    private boolean hasPermissions() {
         boolean accessFineLocation = ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
         boolean accessCourseLocation = ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
 
         return accessFineLocation && accessCourseLocation;
     }
 
+    private void requestPermissions()
+    {
+        ActivityCompat.requestPermissions((Activity) m_context, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 101);
+    }
 
     @Override
     public void onLocationChanged(@NonNull Location location)
     {
-        @SuppressLint("MissingPermission") Location loc = m_locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        m_listener.onLocationUpdated(loc);
+            if (ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(m_context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
+                requestPermissions();
+            }
+            Location loc = m_locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+            m_listener.onLocationUpdated(loc);
     }
 
     @Override
