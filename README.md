@@ -3,12 +3,16 @@ A RSS feed reader for selecting, storing and reading individual feeds. The curre
 
 # Examples 
 - Main Feed Activity 
+
+
 ![Screen Shot 2022-04-02 at 4 22 48 PM](https://user-images.githubusercontent.com/93284303/161398189-3a2f594c-369d-40dd-923a-12f577a04ea3.png)
 
 
 
 
 - Feed Items List 
+
+
 ![Screen Shot 2022-04-02 at 4 22 31 PM](https://user-images.githubusercontent.com/93284303/161398184-387f4913-4761-4038-bc26-2a29b08f2c2f.png)
 
 
