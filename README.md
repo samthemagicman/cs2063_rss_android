@@ -3,13 +3,14 @@ A RSS feed reader for selecting, storing and reading individual feeds. The curre
 
 # Examples 
 - Main Feed Activity 
+![Screen Shot 2022-04-02 at 4 22 48 PM](https://user-images.githubusercontent.com/93284303/161398189-3a2f594c-369d-40dd-923a-12f577a04ea3.png)
 
-![Screen Shot 2022-04-02 at 2 42 51 PM](https://user-images.githubusercontent.com/93284303/161394853-d3b56d7c-a563-4c37-98f8-3e092bf87111.png)
 
 
 
 - Feed Items List 
-<img width="487" alt="Screen Shot 2022-03-31 at 11 02 17 PM" src="https://user-images.githubusercontent.com/93284303/161394809-88ec5716-1926-40f8-91ef-01d6f3ac49ac.png">
+![Screen Shot 2022-04-02 at 4 22 31 PM](https://user-images.githubusercontent.com/93284303/161398184-387f4913-4761-4038-bc26-2a29b08f2c2f.png)
+
 
 # Features 
 - Support for multiple Kijiji Feeds to be stored and viewed individually.
