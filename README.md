@@ -5,7 +5,7 @@ A Market Notifier for selecting, storing and reading individual RSS feeds. The c
 - Main Feed Activity 
 
 
-<img width="431" alt="Screen Shot 2022-04-04 at 6 54 57 PM" src="https://user-images.githubusercontent.com/93284303/161638978-926bd553-9a8f-4e55-a3cd-b36179327eed.png">
+<img width="424" alt="Screen Shot 2022-04-04 at 7 09 42 PM" src="https://user-images.githubusercontent.com/93284303/161640395-69df2c2a-2fa2-4c3a-a29b-16c72ef212a8.png">
 
 
 
