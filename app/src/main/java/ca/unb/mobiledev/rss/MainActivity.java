@@ -143,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        getSupportActionBar().setTitle("RSS Feed Reader");
+        getSupportActionBar().setTitle("Market Notifier");
     }
 
     public void AddToRSSList(String URL, String name) {
