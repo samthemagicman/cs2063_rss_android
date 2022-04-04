@@ -1,11 +1,11 @@
-# RSS Feed Reader (Android)
-A RSS feed reader for selecting, storing and reading individual feeds. The current implemntation supports Kijiji feeds only but could potentially support any RSS feed due to the generic implentation of the reader. 
+# Market Notifier (Android)
+A Market Notifier for selecting, storing and reading individual RSS feeds. The current implemntation supports Kijiji feeds only but could potentially support any RSS feed due to the generic implentation of the reader. 
 
 # Examples 
 - Main Feed Activity 
 
 
-![Screen Shot 2022-04-02 at 4 22 48 PM](https://user-images.githubusercontent.com/93284303/161398189-3a2f594c-369d-40dd-923a-12f577a04ea3.png)
+<img width="431" alt="Screen Shot 2022-04-04 at 6 54 57 PM" src="https://user-images.githubusercontent.com/93284303/161638978-926bd553-9a8f-4e55-a3cd-b36179327eed.png">
 
 
 
