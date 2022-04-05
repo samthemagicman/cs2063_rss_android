@@ -40,3 +40,4 @@ If you would like to contribute, report bugs or request features please contact 
 
 # Roadmap 
 - Add additioanl RSS parsers outside of the current Kijiji only implementation.  
+- Add prefecting to reduce power consumption and data usage. 
