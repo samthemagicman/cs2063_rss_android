@@ -10,6 +10,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
+import android.app.job.JobInfo;
+import android.app.job.JobScheduler;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -51,6 +57,28 @@ public class MainActivity extends AppCompatActivity {
 
         rssFeedManager = new RSSFeedManager(this);
         m_rssFeedList = rssFeedManager.getRssFeedList(false);
+
+
+        //region Job Scheduler starting
+        JobScheduler jobScheduler = (JobScheduler) getSystemService(Context.JOB_SCHEDULER_SERVICE);
+        JobInfo.Builder builder = new JobInfo.Builder(0, new ComponentName(this, CheckRSSFeeds.class));
+        builder.setRequiredNetworkType(JobInfo.NETWORK_TYPE_UNMETERED);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setRequiresBatteryNotLow(true);
+        }
+        builder.setPeriodic(10 * 1000); // This actually only runs every 15 minutes
+        builder.setPersisted(true); // So job loads on boot
+        jobScheduler.schedule(builder.build());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            boolean isScheduled = jobScheduler.getPendingJob(0) != null;
+            Log.d(TAG, "onCreate: IsScheduled " + isScheduled + " " + JobInfo.getMinPeriodMillis());
+        }
+        //endregion
+
+        //region Quick debugging of job scheduling check function so it runs on app open
+        CheckRSSFeeds fe = new CheckRSSFeeds();
+        fe.check(this);
+        //endregion
 
         setContentView(R.layout.activity_main);
 
